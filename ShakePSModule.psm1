@@ -393,7 +393,7 @@ function rmbb {
 ################### Editing and Reload the Profile ##########
 function ep { code $PROFILE }
 
-function epv { vim $PROFILE }
+function epv { nvim $PROFILE }
 
 function reloadprofile {
     & $PROFILE
