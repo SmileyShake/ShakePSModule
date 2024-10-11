@@ -322,7 +322,7 @@ function winstall {
                 Write-Host "You selected: $AppName -ID:$AppId -Version:$AppVersion" -ForegroundColor DarkYellow        
                 # Get confirmation to install
                 $UserName = whoami
-                if ($UserName = shake-mini\shake) {InstallChoice}
+                if ($UserName = "shake-mini\shake") {InstallChoice}
                 else {StandardInstall}
             }
         }   
