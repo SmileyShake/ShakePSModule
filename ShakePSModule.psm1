@@ -248,8 +248,11 @@ function ud {
 
 function vscan {
     # Start Malwarebytes with elevated privileges
-    Start-Process -FilePath "D:\Program Files\Malwarebytes.exe" -Verb RunAs
-    Write-Host "Starting MalwareBytes..." -ForegroundColor Yellow
+    $UserName = whoami
+    if ($UserName -eq "shake-mini\shake") {
+      Start-Process -FilePath "D:\Program Files\Malwarebytes.exe" -Verb RunAs
+      Write-Host "Starting MalwareBytes..." -ForegroundColor Yellow
+    }
     # Update Windows Defender definitions
     Update-MpSignature -UpdateSource MicrosoftUpdateServer
     Write-Host "Starting Windows Defender Quick Scan..." -ForegroundColor Blue
@@ -322,7 +325,7 @@ function winstall {
                 Write-Host "You selected: $AppName -ID:$AppId -Version:$AppVersion" -ForegroundColor DarkYellow        
                 # Get confirmation to install
                 $UserName = whoami
-                if ($UserName = "shake-mini\shake") {InstallChoice}
+                if ($UserName -eq "shake-mini\shake") {InstallChoice}
                 else {StandardInstall}
             }
         }   
