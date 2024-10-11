@@ -5,11 +5,6 @@
 
 
 function Update-PowerShell {
-    if (-not $global:canConnectToGitHub) {
-        Write-Host "Skipping PowerShell update check due to GitHub.com not responding within 1 second." -ForegroundColor Yellow
-        return
-    }
-
     try {
         Write-Host "Checking for PowerShell updates..." -ForegroundColor Blue
         $updateNeeded = $false
@@ -32,17 +27,11 @@ function Update-PowerShell {
         Write-Error "Failed to update PowerShell. Error: $_"
     }
 }
-function prompt {
-    if ($isAdmin) { "[" + (Get-Location) + "] # " } else { "[" + (Get-Location) + "] $ " }
-}
+
 function Test-CommandExists {
     param($command)
     $exists = $null -ne (Get-Command $command -ErrorAction SilentlyContinue)
     return $exists
-}
-
-function Edit-Profile {
-    code $PROFILE.CurrentUserAllHosts
 }
 
 function touch($file) { "" | Out-File $file -Encoding ASCII }
@@ -52,16 +41,12 @@ function ff($name) {
         Write-Output "$($_.FullName)"
     }
 }
-
-# Network Utilities
-function Get-PubIP { (Invoke-WebRequest http://ifconfig.me/ip).Content }
-
-# Open WinUtil
+################### Open WinUtil from Chris Titus Tech   ##################
 function winutil {
 	Invoke-WebRequest -useb https://christitus.com/win | Invoke-Expression
 }
 
-# System Utilities
+################### System Utilities #############################
 function admin {
     if ($args.Count -gt 0) {
         $argList = "& '$args'"
@@ -77,10 +62,6 @@ function uptime {
     } else {
         net statistics workstation | Select-String "since" | ForEach-Object { $_.ToString().Replace('Statistics since ', '') }
     }
-}
-
-function reloadprofile {
-    & $PROFILE
 }
 
 function unzip ($file) {
@@ -101,7 +82,7 @@ function df {
     get-volume
 }
 
-function sed($file, $find, $replace) {
+function far($file, $find, $replace) {
     (Get-Content $file).replace("$find", $replace) | Set-Content $file
 }
 
@@ -113,11 +94,13 @@ function export($name, $value) {
     set-item -force -path "env:$name" -value $value;
 }
 
+function k9 { Stop-Process -Name $args[0] }
+
 function pkill($name) {
     Get-Process $name -ErrorAction SilentlyContinue | Stop-Process
 }
 
-function pgget($name) {
+function pget($name) {
     Get-Process $name
 }
 
@@ -163,97 +146,6 @@ function Set-Cert {
     catch {
         Write-Host "Error signing the script: $_" -ForegroundColor Red
         home   
-    }
-}
-# Search and install Winget Package in a new 'D' drive Folder
-function winstall {
-    param (
-        [string]$PackName
-    )
-    $SearchResults = winget search $PackName
-    if ($SearchResults -like "*No package found matching input criteria.*") {
-        Write-Host "No package found for '$PackName'." -ForegroundColor Red
-        return     
-    }   
-    if ($SearchResults) {
-        Write-Host "Search results for '$PackName':" -ForegroundColor Green
-        $SearchResults | Format-Table -AutoSize
-    } 
-    else {
-        Write-Host "No results found for '$PackName'." -ForegroundColor Red
-        return
-    }    
-    # Prompt user for a selection
-    Write-Host "Enter ID of the package you want to install:" -ForegroundColor Yellow
-    $selectedPackId = Read-Host
-    # Validate user input
-    if ($selectedPackId) {
-        try {
-            $AppId = $selectedPackId
-            if (winget list | Where-Object { $_ -like "*$AppId*" }) {
-                Write-Host "$PackName is already installed.  Checking for updates..." -ForegroundColor Yellow
-                winget upgrade --id $AppId --accept-source-agreements --accept-package-agreements
-                return
-            }
-            else {
-                $packageInfo = winget show $AppId
-                # Extract Name and Version
-                $AppVersion = ($packageInfo | Where-Object { $_ -like 'Version:*' }).Split(':')[1].Trim()
-                $FLine = $packageInfo | Where-Object { $_ -match '^Found' }
-                $AppName = ($FLine -split '\[')[0].Replace('Found', '').Trim()        
-                # Output selected package details
-                Write-Host "You selected: $AppName -ID:$AppId -Version:$AppVersion" -ForegroundColor DarkYellow        
-                # Get confirmation to install
-                InstallChoice
-            }
-        }   
-        catch {
-            Write-Host "Could not install $AppName. Please try again. Error: $_" -ForegroundColor Red
-        }
-        
-    else {
-        Write-Host "Invalid selection. Rerun 'winstall' to try again." -ForegroundColor Red
-    }
-    }
-}
-function InstallChoice {
-    Write-Host "Please choose an option for $AppName :" -ForegroundColor Yellow
-    Write-Host "    1. Standard winget installation." -ForegroundColor Cyan
-    Write-Host "    2. Create new folder $AppName in 'D:\Program Files'" -ForegroundColor Cyan
-    Write-Host "       Note: This may revert to the standard installation." -ForegroundColor Red
-    Write-Host "    3. Do Not Install $AppName" -ForegroundColor Cyan
-    $Opt = Read-Host
-    if ($Opt -eq '1') {
-        try {
-        Write-Host "Installing $AppName..." -ForegroundColor Yellow
-        winget install -e --id $AppId --accept-source-agreements --accept-package-agreements
-        Write-Host "$AppName installed successfully." -ForegroundColor Green
-        }
-        catch {
-            Write-Host "Could not install $AppName with winget. Error: $_" -ForegroundColor Red
-        }
-    }
-    elseif ($Opt -eq '2') {            
-        try {
-            $InPath = "D:\Program Files\$AppName"
-            New-Item -ItemType Directory -Path $InPath -Force | Out-Null
-            Write-Host "New folder created: $InPath" -ForegroundColor Blue
-            Write-Host "Opening $InPath check for successful operation." -ForegroundColor Yellow
-            Start-Process explorer.exe -ArgumentList "$InPath"
-            Write-Host "$InPath will remain empty if winget could not set the Destination" -ForegroundColor Red
-            Write-Host "Installing $AppName..." -ForegroundColor Yellow
-            winget install -e --id $AppId --location $InPath --accept-source-agreements --accept-package-agreements     
-            Write-Host "$AppName installed successfully." -ForegroundColor Green             
-        }
-        catch {
-            Write-Host "Could not install $AppName with winget. Error: $_" -ForegroundColor Red
-        }    
-    }
-    elseif ($Opt -eq '3') {
-        Write-Host "$AppName was not installed." -ForegroundColor Red
-    }
-    else {
-        Write-Host "$AppName was not installed." -ForegroundColor Red
     }
 }
 
@@ -390,6 +282,101 @@ function vscan {
     }               
 }
 
+# Search and install Winget Package in a new 'D' drive Folder
+function winstall {
+    param (
+        [string]$PackName
+    )
+    $SearchResults = winget search $PackName
+    if ($SearchResults -like "*No package found matching input criteria.*") {
+        Write-Host "No package found for '$PackName'." -ForegroundColor Red
+        return     
+    }   
+    if ($SearchResults) {
+        Write-Host "Search results for '$PackName':" -ForegroundColor Green
+        $SearchResults | Format-Table -AutoSize
+    } 
+    else {
+        Write-Host "No results found for '$PackName'." -ForegroundColor Red
+        return
+    }    
+    # Prompt user for a selection
+    Write-Host "Enter ID of the package you want to install:" -ForegroundColor Yellow
+    $selectedPackId = Read-Host
+    # Validate user input
+    if ($selectedPackId) {
+        try {
+            $AppId = $selectedPackId
+            if (winget list | Where-Object { $_ -like "*$AppId*" }) {
+                Write-Host "$PackName is already installed.  Checking for updates..." -ForegroundColor Yellow
+                winget upgrade --id $AppId --accept-source-agreements --accept-package-agreements
+                return
+            }
+            else {
+                $packageInfo = winget show $AppId
+                # Extract Name and Version
+                $AppVersion = ($packageInfo | Where-Object { $_ -like 'Version:*' }).Split(':')[1].Trim()
+                $FLine = $packageInfo | Where-Object { $_ -match '^Found' }
+                $AppName = ($FLine -split '\[')[0].Replace('Found', '').Trim()        
+                # Output selected package details
+                Write-Host "You selected: $AppName -ID:$AppId -Version:$AppVersion" -ForegroundColor DarkYellow        
+                # Get confirmation to install
+                if (whoami = shake-mini\shake) {InstallChoice}
+                else {StandardInstall}
+            }
+        }   
+        catch {
+            Write-Host "Could not install $AppName. Please try again. Error: $_" -ForegroundColor Red
+        }
+    }
+    else {
+        Write-Host "Invalid selection. Rerun 'winstall' to try again." -ForegroundColor Red
+    }
+}
+function StandardInstall {
+    try {
+        Write-Host "Installing $AppName..." -ForegroundColor Yellow
+        winget install -e --id $AppId --accept-source-agreements --accept-package-agreements
+        Write-Host "$AppName installed successfully." -ForegroundColor Green
+    }
+    catch {
+        Write-Host "Could not install $AppName with winget. Error: $_" -ForegroundColor Red
+    }
+}
+function InstallChoice {
+    Write-Host "Please choose an option for $AppName :" -ForegroundColor Yellow
+    Write-Host "    1. Standard winget installation." -ForegroundColor Cyan
+    Write-Host "    2. Create new folder $AppName in 'D:\Program Files'" -ForegroundColor Cyan
+    Write-Host "       Note: This may revert to the standard installation." -ForegroundColor Red
+    Write-Host "    3. Do Not Install $AppName" -ForegroundColor Cyan
+    $Opt = Read-Host
+    if ($Opt -eq '1') {
+        StandardInstall
+    }
+    elseif ($Opt -eq '2') {            
+        try {
+            $InPath = "D:\Program Files\$AppName"
+            New-Item -ItemType Directory -Path $InPath -Force | Out-Null
+            Write-Host "New folder created: $InPath" -ForegroundColor Blue
+            Write-Host "Opening $InPath check for successful operation." -ForegroundColor Yellow
+            Start-Process explorer.exe -ArgumentList "$InPath"
+            Write-Host "$InPath will remain empty if winget could not set the Destination" -ForegroundColor Red
+            Write-Host "Installing $AppName..." -ForegroundColor Yellow
+            winget install -e --id $AppId --location $InPath --accept-source-agreements --accept-package-agreements     
+            Write-Host "$AppName installed successfully." -ForegroundColor Green             
+        }
+        catch {
+            Write-Host "Could not install $AppName with winget. Error: $_" -ForegroundColor Red
+        }    
+    }
+    elseif ($Opt -eq '3') {
+        Write-Host "$AppName was not installed." -ForegroundColor Red
+    }
+    else {
+        Write-Host "$AppName was not installed." -ForegroundColor Red
+    }
+}
+
 function bench {
     Write-Host "Starting Cinebench, the '-Z's and HW Monitor..." -ForegroundColor Yellow
     Start-Process -FilePath "D:\WindowsApps\MAXONComputerGmbH.Cinebench_23.2.0.0_x64__rsne5bsk8s7tj\bin\Cinebench.exe"
@@ -403,16 +390,18 @@ function rmbb {
     Start-Process -FilePath "D:\BleachBit\bleachbit.exe" -Verb RunAs
     Start-Process -FilePath "D:\Utility\Program Folders\Sys Internals\RAMMap64.exe" -Verb RunAs
 }
-# Quick Access to Editing the Profile
+################### Editing and Reload the Profile ##########
 function ep { code $PROFILE }
-# Simplified Process Management
-function k9 { Stop-Process -Name $args[0] }
 
-# Enhanced Listing
+function epv { vim $PROFILE }
+
+function reloadprofile {
+    & $PROFILE
+}
+################# Enhanced Listing ############
 function la { Get-ChildItem -Path . -Force | Format-Table -AutoSize }
 function ll { Get-ChildItem -Path . -Force -Hidden | Format-Table -AutoSize }
-# Git Shortcuts 
-############### 
+################ Git Shortcuts ############### 
 function gs { git status }
 
 function ga { git add . }
@@ -435,16 +424,17 @@ function lazyg {
     git commit -m "$args"
     git push
 }
-####################################
-# Quick Access to System Information
-function sysinfo { Get-ComputerInfo }
 
-# Networking Utilities
+############# System Information ##################
+function sysinfo { Get-ComputerInfo }
+############# Network Utilities ###################
+function Get-PubIP { (Invoke-WebRequest http://ifconfig.me/ip).Content }
+
 function flushdns {
 	Clear-DnsClientCache
 	Write-Host "DNS has been flushed" -ForegroundColor Green
 }
-# Reset Network
+    
 function ReNet {
     ipconfig /release
     flushdns
@@ -460,32 +450,26 @@ function ReNet {
     Write-Host "Please remember to restart the computer for changes to take effect." -ForegroundColor Yellow
     }
 }
-# Clipboard Utilities
+
+################ Clipboard Utilities ##############################
 function cpy { Set-Clipboard $args[0] }
 
 function pst { Get-Clipboard }
 
-# Set theme 
 function PressEnter {     
     Write-Host " Press Enter to Continue" -ForegroundColor DarkGray
     Read-Host
     return
 }
 
-# Help Function
-
 function Show-Help {
     @"
 PowerShell Profile Help
 =======================
 
-Update-Profile - Checks for profile updates from a remote repository and updates if necessary.
-
 Update-PowerShell - Checks for the latest PowerShell release and updates if a new version is available.
 
 ud - Checks winget and windows for updates and installs any updates found.
-
-Edit-Profile - Opens the current user's profile for editing using the configured editor.
 
 touch <file> - Creates a new empty file.
 
@@ -505,11 +489,13 @@ grep <regex> [dir] - Searches for a regex pattern in files within the specified 
 
 df - Displays information about volumes.
 
-sed <file> <find> <replace> - Replaces text in a file.
+far <file> <find> <replace> - Replaces text in a file.
 
 which <name> - Shows the path of the command.
 
 export <name> <value> - Sets an environment variable.
+
+k9 <name> - Kills a process by name.
 
 pkill <name> - Kills processes by name.
 
@@ -545,11 +531,11 @@ rmbb - Starts BleachBit and RAMMap.
 
 bench - Starts Cinbench and monitors.
 
-ep - Opens the profile for editing.
+ep - Opens the profile for editing with VSCode.
+
+epv - Opens the profile for editing with NeoVim.
 
 Get-PoshThemes - List of available Oh My Posh! themes.
-
-k9 <name> - Kills a process by name.
 
 la - Lists all files in the current directory with detailed formatting.
 
