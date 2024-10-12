@@ -1,220 +1,6 @@
 #################################################################################################################################
 ############                        SHAKE'S PowerShell Module                        ############
 #################################################################################################################################
-$UserName = whoami
-if ($UserName -ne "shake-mini\shake") {
-    InstallPrograms
-    Update-PowerShell
-}
-###############################
-# Program List and Stored Paths
-$Programs = @(
-    "Microsoft.Sysinternals.RAMMap",
-    "Malwarebytes.Malwarebytes",
-    "BleachBit.BleachBit",
-    "Maxon.CinebenchR23",
-    "CPUID.HWMonitor",
-    "Git.Git"
-)
-# Hash table to store the installation paths for specific programs
-$ProgramPaths = @{}
-
-# Loop through the list of programs and install them
-function InstallPrograms {
-    foreach ($Program in $Programs) {
-        switch ($Program) {
-            "Microsoft.Sysinternals.RAMMap" {
-            # Try to find both RAMMap.exe and RAMMap64.exe
-                InstalList -Program $Program -ExeName "rammap.exe"
-                $rammap64Path = Get-Command "RAMMap64.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path
-                if ($rammap64Path) {
-                    $ProgramPaths[$Program] = $rammap64Path
-                    Write-Host "RAMMap64.exe found at: $rammap64Path" -ForegroundColor Cyan
-                }
-            }
-            "Malwarebytes.Malwarebytes" {
-            # Try to find both mbam.exe and Malwarebytes.exe
-                InstalList -Program $Program -ExeName "mbam.exe"
-                $malwarebytesPath = Get-Command "Malwarebytes.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path
-                if ($malwarebytesPath) {
-                    $ProgramPaths[$Program] = $malwarebytesPath
-                    Write-Host "Malwarebytes.exe found at: $malwarebytesPath" -ForegroundColor Cyan
-                }
-            }
-            "BleachBit.BleachBit" {
-                InstalList -Program $Program -ExeName "bleachbit.exe"
-            }
-            "Maxon.CinebenchR23" {
-                InstalList -Program $Program -ExeName "Cinebench.exe"
-            }
-            "CPUID.HWMonitor" {
-                InstalList -Program $Program -ExeName "HWMonitor.exe"
-            }
-            default {
-                InstalList -Program $Program
-            }
-        }
-    }
-    Write-Host "Installation Complete." -ForegroundColor Green    
-}
-# This Function is called in the 'InstallPrograms' Function
-#Function to Install a Program and Store Its Path 
-function InstalList {
-    param (
-        [String]$Program,
-        [String]$ExeName  # The name of the executable to find (optional)
-    )
-    Write-Host "Checking for ${Program}..." -ForegroundColor Yellow
-    # Check if the program is already installed
-    $isInstalled = winget list --id $Program -e | Select-String -Pattern $Program
-    if ($isInstalled) {
-        Write-Host "$Program is already installed." -ForegroundColor Green
-        # If an executable name is provided, try to get its path
-        if ($ExeName) {
-            $exePath = Get-Command $ExeName -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path
-            if ($exePath) {
-                $ProgramPaths[$Program] = $exePath
-                Write-Host "${Program} path: ${exePath}" -ForegroundColor Cyan
-            } else {
-                Write-Host "Could not find executable for ${Program}." -ForegroundColor Red
-            }
-        }
-    } 
-    else {
-        Write-Host "Installing ${Program}..." -ForegroundColor Yellow
-        try {
-            winget install --id $Program --silent --accept-package-agreements --accept-source-agreements -e
-            if ($?) {
-                Write-Host "${Program} installed successfully." -ForegroundColor Green
-                # Store the executable path if provided
-                if ($ExeName) {
-                    $exePath = Get-Command $ExeName -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path
-                    if ($exePath) {
-                        $ProgramPaths[$Program] = $exePath
-                        Write-Host "${Program} path: ${exePath}" -ForegroundColor Cyan
-                    } 
-                    else {
-                        Write-Host "Could not find executable for ${Program}." -ForegroundColor Red
-                    }
-                }
-            }
-            else {
-                Write-Host "${Program} installation failed." -ForegroundColor Red
-            }
-        } 
-        catch {
-                    Write-Host "Error installing ${Program}: $_" -ForegroundColor Red
-        }
-    }
-}        
-
-# Function to start a program using its stored path
-function StartProgram {
-    param (
-        [String]$ProgramName
-    )    
-    if ($ProgramPaths.ContainsKey($ProgramName)) {
-        $path = $ProgramPaths[$ProgramName]
-        Write-Host "Starting $ProgramName from $path..." -ForegroundColor Yellow
-        Start-Process $path
-    } 
-    elseif ($ProgramName -eq "Malwarebytes.Malwarebytes") {
-        $mbamPath = Get-Command "mbam.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path
-        if (-not $mbamPath) {
-            # Check common installation path
-            $commonPath = "C:\Program Files\Malwarebytes\Anti-Malware\mbam.exe"
-            if (Test-Path $commonPath) {
-                $mbamPath = $commonPath
-            }
-        }
-        if ($mbamPath) {
-            Write-Host "Starting Malwarebytes from $mbamPath..." -ForegroundColor Yellow
-            Start-Process $mbamPath
-        }
-        else {
-            Write-Host "Malwarebytes executable not found." -ForegroundColor Red
-        }
-    }
-    elseif ($ProgramName -eq "BleachBit.BleachBit") {
-        $bleachbitPath = Get-Command "bleachbit.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path
-        if (-not $bleachbitPath) {
-            $commonPath = "C:\Program Files\BleachBit\bleachbit.exe"
-            $commonPath2 = "$HOME\AppData\Local\Programs\BleachBit\bleachbit.exe"
-            if (Test-Path $commonPath) {
-                $bleachbitPath = $commonPath
-            }
-            elseif (Test-Path $commonPath2) {
-                $bleachbitPath = $commonPath2
-            }
-            else {
-                # Log a message if neither path is found
-                Write-Host "BleachBit not found in PATH or common installation path." -ForegroundColor Red
-            }
-        }
-        if ($bleachbitPath) {
-            Write-Host "Starting BleachBit from $bleachbitPath..." -ForegroundColor Yellow
-            Start-Process $bleachbitPath
-        } 
-        else {
-            Write-Host "BleachBit executable not found." -ForegroundColor Red
-        }
-    } 
-    elseif ($ProgramName -eq "CPUID.HWMonitor") {
-        # Attempt to start HWMonitor as HWMonitor.exe if it's installed
-        $hwmonitorPath = Get-Command "HWMonitor.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path
-        if (-not $hwmonitorPath) {
-            # Check common installation path
-            $commonPath = "C:\Program Files\CPUID\HWMonitor\HWMonitor.exe"
-            $commonPath2 = "$HOME\AppData\Local\Programs\CPUID\HWMonitor\HWMonitor.exe"
-            if (Test-Path $commonPath) {
-                $hwmonitorPath = $commonPath
-            }
-            elseif (Test-Path $commonPath2) {
-                $hwmonitorPath = $commonPath2
-            }
-            else {
-                # Log a message if neither path is found
-                Write-Host "HWMonitor not found in PATH or common installation path." -ForegroundColor Red
-            }
-        }
-        if ($hwmonitorPath) {
-            Write-Host "Starting HWMonitor from $bleachbitPath..." -ForegroundColor Yellow
-            Start-Process $hwmonitorPath
-        } 
-        else {
-            Write-Host "HWMonitor executable not found." -ForegroundColor Red
-        }
-    } 
-    elseif ($ProgramName -eq "Maxon.CinebenchR23") {
-        # Attempt to start Cinebench as Cinebench.exe if it's installed
-        $cinebenchPath = Get-Command "Cinebench.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path
-        if (-not $cinebenchPath) {
-            # Check common installation path
-            $commonPath = "C:\Program Files\Maxon Cinebench R23\Cinebench.exe"
-            $commonPath2 = "$HOME\AppData\Local\Programs\Maxon Cinebench R23\Cinebench.exe"
-            if (Test-Path $commonPath) {
-                $cinebenchPath = $commonPath
-            }
-            elseif (Test-Path $commonPath2) {
-                $cinebenchPath = $commonPath2
-            }
-            else {
-                # Log a message if neither path is found
-                Write-Host "Cinebench not found in PATH or common installation path." -ForegroundColor Red
-            }
-        }
-        if ($cinebenchPath) {
-            Write-Host "Starting Cinebench from $cinebenchPath..." -ForegroundColor Yellow
-            Start-Process $cinebenchPath
-        } 
-        else {
-            Write-Host "Cinebench executable not found." -ForegroundColor Red
-        }
-    } 
-    else {
-        Write-Host "$ProgramName path not found in stored paths." -ForegroundColor Red
-    }
-}
 
 function Update-PowerShell {
     try {
@@ -359,48 +145,45 @@ function Set-Cert {
         home   
     }
 }
-
+############### SHORTCUTS #####################################
 function home { Set-Location -Path $HOME }
-
 function scripts {
     $UserName = whoami 
-    if ($UserName -eq "shake-mini\shake") {
+    if ("$UserName" -eq "shake-mini\shake") {
         Set-Location -Path D:\Documents\PowerShell\Scripts
     }    
     else {    
         Set-Location -Path $HOME\Documents\WindowsPowerShell\Scripts 
     }
 }
-
 function dl { 
     $UserName = whoami
-    if ($UserName -eq "shake-mini\shake") {
+    if ("$UserName" -eq "shake-mini\shake") {
         Set-Location -Path D:\Downloads
     }
     else{
         Set-Location -Path $HOME\Downloads 
     }
 }
-
 function docs { 
     $UserName = whoami
-    if ($UserName -eq "shake-mini\shake") {
+    if ("$UserName" -eq "shake-mini\shake") {
         Set-Location -Path D:\Documents
     }
     else {
         Set-Location -Path $HOME\Documents 
     }
 }
-
 function dtop { Set-Location -Path $HOME\Desktop }
 
+###########  UTILITIES  ##############
+## Delete Junk Files ##
 function junk {
     # Clean up temporary files, redirect errors to $null to suppress them
     Get-ChildItem -Path $env:TEMP\* -Recurse -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue 2>$null
     Get-ChildItem -Path 'C:\Windows\Temp\*' -Recurse -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue 2>$null
     Get-ChildItem -Path 'C:\Windows\Downloaded Program Files\*' -Recurse -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue 2>$null
     Get-ChildItem -Path 'C:\Windows\Prefetch\*' -Recurse -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue 2>$null
-
     # Delete the contents of the SoftwareDistribution folder, suppress errors
     Try {
         Stop-Service -Name wuauserv -ErrorAction SilentlyContinue 2>$null
@@ -410,7 +193,7 @@ function junk {
         # Suppress errors, do nothing
     }
 }
-
+## Update Winget, Programs and Windows ##
 function ud {
     if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
         Write-Host "Winget is not installed. Installing Winget now..." -ForegroundColor Blue
@@ -480,17 +263,13 @@ function ud {
         Write-Host "Windows is up to date." -ForegroundColor Green
     }
 }
-
+##  Virus Scan  ##
 function vscan {
     # Start Malwarebytes with elevated privileges
     $UserName = whoami
-    if ($UserName -eq "shake-mini\shake") {
+    if ("$UserName" -eq "shake-mini\shake") {
         Start-Process -FilePath "D:\Program Files\Malwarebytes.exe" -Verb RunAs
         Write-Host "Starting MalwareBytes..." -ForegroundColor Yellow
-    }
-    else {
-        Write-Host "Attempting to Start Malwarebytes..." -ForegroundColor Yellow
-        StartProgram -ProgramName "Malwarebytes.Malwarebytes"
     }
     # Update Windows Defender definitions
     Update-MpSignature -UpdateSource MicrosoftUpdateServer
@@ -524,7 +303,9 @@ function vscan {
     }               
 }
 
-# Search and install Winget Package in a new 'D' drive Folder
+###############################################################################
+# Search and install Winget Package with option to try a new 'D' drive Folder
+###############################################################################
 function winstall {
     param (
         [string]$PackName
@@ -564,7 +345,7 @@ function winstall {
                 Write-Host "You selected: $AppName -ID:$AppId -Version:$AppVersion" -ForegroundColor DarkYellow        
                 # Get confirmation to install
                 $UserName = whoami
-                if ($UserName -eq "shake-mini\shake") {InstallChoice}
+                if ("$UserName" -eq "shake-mini\shake") {InstallChoice}
                 else {StandardInstall}
             }
         }   
@@ -576,7 +357,6 @@ function winstall {
         Write-Host "Invalid selection. Rerun 'winstall' to try again." -ForegroundColor Red
     }
 }
-
 function StandardInstall {
     try {
         Write-Host "Installing $AppName..." -ForegroundColor Yellow
@@ -587,7 +367,6 @@ function StandardInstall {
         Write-Host "Could not install $AppName with winget. Error: $_" -ForegroundColor Red
     }
 }
-
 function InstallChoice {
     Write-Host "Please choose an option for $AppName :" -ForegroundColor Yellow
     Write-Host "    1. Standard winget installation." -ForegroundColor Cyan
@@ -622,38 +401,6 @@ function InstallChoice {
     }
 }
 
-function bench {
-    $UserName = whoami
-    if ($UserName -eq "shake-mini\shake") {
-        Write-Host "Starting Cinebench, the '-Z's and HW Monitor..." -ForegroundColor Yellow
-        Start-Process -FilePath "D:\WindowsApps\MAXONComputerGmbH.Cinebench_23.2.0.0_x64__rsne5bsk8s7tj\bin\Cinebench.exe"
-        Start-Process -FilePath "D:\Program Files\hwmonitor\HWMonitor.exe" -Verb RunAs
-        Start-Process -FilePath "D:\Program Files\cpu-z\cpuz.exe" -Verb RunAs
-        Start-Process -FilePath "C:\Program Files (x86)\GPU-Z\GPU-Z.exe" -Verb RunAs
-    }
-    else {
-        Write-Host "Attempting to Start HWMonitor and Cinebench..." -ForegroundColor Yellow
-        StartProgram -ProgramName "CPUID.HWMonitor"
-        StartProgram -ProgramName "Maxon.CinebenchR23"
-    }
-
-}
-
-
-function rmbb {
-    $UserName = whoami
-    if ($UserName -eq "shake-mini\shake") {
-        Write-Host "Starting BleachBit and RAMMap..." -ForegroundColor Yellow
-        Start-Process -FilePath "D:\BleachBit\bleachbit.exe" -Verb RunAs
-        Start-Process -FilePath "D:\Utility\Program Folders\Sys Internals\RAMMap64.exe" -Verb RunAs
-    }
-    else {
-        Write-Host "Attempting to Start RAMMap and BleachBit..." -ForegroundColor Yellow
-    StartProgram -ProgramName "Microsoft.Sysinternals.RAMMap"
-    StartProgram -ProgramName "BleachBit.BleachBit"
-    }
-}
-
 ################### Editing and Reload the Profile ##########
 function ep { code $PROFILE }
 
@@ -662,10 +409,12 @@ function epv { nvim $PROFILE }
 function reloadprofile {
     & $PROFILE
 }
+
 ################# Enhanced Listing ############
 function la { Get-ChildItem -Path . -Force | Format-Table -AutoSize }
 function ll { Get-ChildItem -Path . -Force -Hidden | Format-Table -AutoSize }
-################ Git Shortcuts ############### 
+
+################ Git Shortcuts #################
 function gs { git status }
 
 function ga { git add . }
@@ -692,13 +441,14 @@ function lazyg {
 ############# System Information ##################
 function sysinfo { Get-ComputerInfo }
 ############# Network Utilities ###################
+## Get IP Address ##
 function Get-PubIP { (Invoke-WebRequest http://ifconfig.me/ip).Content }
-
+## Flush DNS ##
 function flushdns {
 	Clear-DnsClientCache
 	Write-Host "DNS has been flushed" -ForegroundColor Green
 }
-    
+## Reset Network ##
 function ReNet {
     ipconfig /release
     flushdns
@@ -715,17 +465,14 @@ function ReNet {
     }
 }
 
-################ Clipboard Utilities ##############################
+################ Clipboard Utilities ##########################
+## Copy ##
 function cpy { Set-Clipboard $args[0] }
-
+## Paste ##
 function pst { Get-Clipboard }
 
-function PressEnter {     
-    Write-Host " Press Enter to Continue" -ForegroundColor DarkGray
-    Read-Host
-    return
-}
-
+############### SETUP MODULES #################################
+## Setup Zoxide ##
 function ZoxSetUp {
     if (Get-Command zoxide -ErrorAction SilentlyContinue) {
         Invoke-Expression (& { (zoxide init powershell | Out-String) }) 
@@ -742,8 +489,7 @@ function ZoxSetUp {
         }
     }
 }
-
-# Ensure Terminal-Icons module is installed before importing
+## Install Modules ##
 function ModInstall {
     if (-not (Get-Module -ListAvailable -Name Terminal-Icons)) {
         Install-Module -Name Terminal-Icons -Scope CurrentUser -Force -SkipPublisherCheck
@@ -764,6 +510,7 @@ function ModInstall {
         Import-Module "$ChocolateyProfile"
     }
 }
+## PS ReadLine Setup ##
 function PSRLsetup {
     # PowerShell ReadLine 
     Set-PSReadLineOption -Colors @{
@@ -801,7 +548,7 @@ function PSRLsetup {
     }
     Register-ArgumentCompleter -Native -CommandName dotnet -ScriptBlock $scriptblock
 }
-
+## Set Aliases ##
 function AliasSetup {
     #Set aliases for NeoVim
     Set-Alias -Name vi -Value nvim -Option AllScope -Scope Global -Force
@@ -813,11 +560,19 @@ function AliasSetup {
     Set-Alias -Name zi -Value __zoxide_zi -Option AllScope -Scope Global -Force
     Set-Alias -Name cd -Value z -Option AllScope -Scope Global -Force
 }
+## Calls Initialization functions ##
+function PSInit {
+    ModInstall
+    PSRLsetup
+    ZoxSetUp
+    AliasSetup
+}
 
-ModInstall
-PSRLsetup
-ZoxSetUp
-AliasSetup
+##################################################################################
+
+PSInit
+
+##################################################################################
 
 function Show-Help { @"
 PowerShell Profile Help
