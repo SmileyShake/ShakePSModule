@@ -7,6 +7,215 @@ if ($UserName -ne "shake-mini\shake") {
     InstallPrograms
     Update-PowerShell
 }
+###############################
+# Program List and Stored Paths
+$Programs = @(
+    "Microsoft.Sysinternals.RAMMap",
+    "Malwarebytes.Malwarebytes",
+    "BleachBit.BleachBit",
+    "Maxon.CinebenchR23",
+    "CPUID.HWMonitor",
+    "Git.Git"
+)
+# Hash table to store the installation paths for specific programs
+$ProgramPaths = @{}
+
+# Loop through the list of programs and install them
+function InstallPrograms {
+    foreach ($Program in $Programs) {
+        switch ($Program) {
+            "Microsoft.Sysinternals.RAMMap" {
+            # Try to find both RAMMap.exe and RAMMap64.exe
+                InstalList -Program $Program -ExeName "rammap.exe"
+                $rammap64Path = Get-Command "RAMMap64.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path
+                if ($rammap64Path) {
+                    $ProgramPaths[$Program] = $rammap64Path
+                    Write-Host "RAMMap64.exe found at: $rammap64Path" -ForegroundColor Cyan
+                }
+            }
+            "Malwarebytes.Malwarebytes" {
+            # Try to find both mbam.exe and Malwarebytes.exe
+                InstalList -Program $Program -ExeName "mbam.exe"
+                $malwarebytesPath = Get-Command "Malwarebytes.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path
+                if ($malwarebytesPath) {
+                    $ProgramPaths[$Program] = $malwarebytesPath
+                    Write-Host "Malwarebytes.exe found at: $malwarebytesPath" -ForegroundColor Cyan
+                }
+            }
+            "BleachBit.BleachBit" {
+                InstalList -Program $Program -ExeName "bleachbit.exe"
+            }
+            "Maxon.CinebenchR23" {
+                InstalList -Program $Program -ExeName "Cinebench.exe"
+            }
+            "CPUID.HWMonitor" {
+                InstalList -Program $Program -ExeName "HWMonitor.exe"
+            }
+            default {
+                InstalList -Program $Program
+            }
+        }
+    }
+    Write-Host "Installation Complete." -ForegroundColor Green    
+}
+# This Function is called in the 'InstallPrograms' Function
+#Function to Install a Program and Store Its Path 
+function InstalList {
+    param (
+        [String]$Program,
+        [String]$ExeName  # The name of the executable to find (optional)
+    )
+    Write-Host "Checking for ${Program}..." -ForegroundColor Yellow
+    # Check if the program is already installed
+    $isInstalled = winget list --id $Program -e | Select-String -Pattern $Program
+    if ($isInstalled) {
+        Write-Host "$Program is already installed." -ForegroundColor Green
+        # If an executable name is provided, try to get its path
+        if ($ExeName) {
+            $exePath = Get-Command $ExeName -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path
+            if ($exePath) {
+                $ProgramPaths[$Program] = $exePath
+                Write-Host "${Program} path: ${exePath}" -ForegroundColor Cyan
+            } else {
+                Write-Host "Could not find executable for ${Program}." -ForegroundColor Red
+            }
+        }
+    } 
+    else {
+        Write-Host "Installing ${Program}..." -ForegroundColor Yellow
+        try {
+            winget install --id $Program --silent --accept-package-agreements --accept-source-agreements -e
+            if ($?) {
+                Write-Host "${Program} installed successfully." -ForegroundColor Green
+                # Store the executable path if provided
+                if ($ExeName) {
+                    $exePath = Get-Command $ExeName -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path
+                    if ($exePath) {
+                        $ProgramPaths[$Program] = $exePath
+                        Write-Host "${Program} path: ${exePath}" -ForegroundColor Cyan
+                    } 
+                    else {
+                        Write-Host "Could not find executable for ${Program}." -ForegroundColor Red
+                    }
+                }
+            }
+            else {
+                Write-Host "${Program} installation failed." -ForegroundColor Red
+            }
+        } 
+        catch {
+                    Write-Host "Error installing ${Program}: $_" -ForegroundColor Red
+        }
+    }
+}        
+
+# Function to start a program using its stored path
+function StartProgram {
+    param (
+        [String]$ProgramName
+    )    
+    if ($ProgramPaths.ContainsKey($ProgramName)) {
+        $path = $ProgramPaths[$ProgramName]
+        Write-Host "Starting $ProgramName from $path..." -ForegroundColor Yellow
+        Start-Process $path
+    } 
+    elseif ($ProgramName -eq "Malwarebytes.Malwarebytes") {
+        $mbamPath = Get-Command "mbam.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path
+        if (-not $mbamPath) {
+            # Check common installation path
+            $commonPath = "C:\Program Files\Malwarebytes\Anti-Malware\mbam.exe"
+            if (Test-Path $commonPath) {
+                $mbamPath = $commonPath
+            }
+        }
+        if ($mbamPath) {
+            Write-Host "Starting Malwarebytes from $mbamPath..." -ForegroundColor Yellow
+            Start-Process $mbamPath
+        }
+        else {
+            Write-Host "Malwarebytes executable not found." -ForegroundColor Red
+        }
+    }
+    elseif ($ProgramName -eq "BleachBit.BleachBit") {
+        $bleachbitPath = Get-Command "bleachbit.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path
+        if (-not $bleachbitPath) {
+            $commonPath = "C:\Program Files\BleachBit\bleachbit.exe"
+            $commonPath2 = "$HOST\AppData\Local\Programs\BleachBit\bleachbit.exe"
+            if (Test-Path $commonPath) {
+                $bleachbitPath = $commonPath
+            }
+            elseif (Test-Path $commonPath2) {
+                $bleachbitPath = $commonPath2
+            }
+            else {
+                # Log a message if neither path is found
+                Write-Host "BleachBit not found in PATH or common installation path." -ForegroundColor Red
+            }
+        }
+        if ($bleachbitPath) {
+            Write-Host "Starting BleachBit from $bleachbitPath..." -ForegroundColor Yellow
+            Start-Process $bleachbitPath
+        } 
+        else {
+            Write-Host "BleachBit executable not found." -ForegroundColor Red
+        }
+    } 
+    elseif ($ProgramName -eq "CPUID.HWMonitor") {
+        # Attempt to start HWMonitor as HWMonitor.exe if it's installed
+        $hwmonitorPath = Get-Command "HWMonitor.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path
+        if (-not $hwmonitorPath) {
+            # Check common installation path
+            $commonPath = "C:\Program Files\CPUID\HWMonitor\HWMonitor.exe"
+            $commonPath2 = "$HOME\AppData\Local\Programs\CPUID\HWMonitor\HWMonitor.exe"
+            if (Test-Path $commonPath) {
+                $hwmonitorPath = $commonPath
+            }
+            elseif (Test-Path $commonPath2) {
+                $hwmonitorPath = $commonPath2
+            }
+            else {
+                # Log a message if neither path is found
+                Write-Host "HWMonitor not found in PATH or common installation path." -ForegroundColor Red
+            }
+        }
+        if ($hwmonitorPath) {
+            Write-Host "Starting HWMonitor from $bleachbitPath..." -ForegroundColor Yellow
+            Start-Process $hwmonitorPath
+        } 
+        else {
+            Write-Host "HWMonitor executable not found." -ForegroundColor Red
+        }
+    } 
+    elseif ($ProgramName -eq "Maxon.CinebenchR23") {
+        # Attempt to start Cinebench as Cinebench.exe if it's installed
+        $cinebenchPath = Get-Command "Cinebench.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path
+        if (-not $cinebenchPath) {
+            # Check common installation path
+            $commonPath = "C:\Program Files\Maxon Cinebench R23\Cinebench.exe"
+            $commonPath2 = "$HOME\AppData\Local\Programs\Maxon Cinebench R23\Cinebench.exe"
+            if (Test-Path $commonPath) {
+                $cinebenchPath = $commonPath
+            }
+            elseif (Test-Path $commonPath2) {
+                $cinebenchPath = $commonPath2
+            }
+            else {
+                # Log a message if neither path is found
+                Write-Host "Cinebench not found in PATH or common installation path." -ForegroundColor Red
+            }
+        }
+        if ($cinebenchPath) {
+            Write-Host "Starting Cinebench from $cinebenchPath..." -ForegroundColor Yellow
+            Start-Process $cinebenchPath
+        } 
+        else {
+            Write-Host "Cinebench executable not found." -ForegroundColor Red
+        }
+    } 
+    else {
+        Write-Host "$ProgramName path not found in stored paths." -ForegroundColor Red
+    }
+}
 
 function Update-PowerShell {
     try {
@@ -436,213 +645,6 @@ function rmbb {
         Write-Host "Attempting to Start RAMMap and BleachBit..." -ForegroundColor Yellow
     StartProgram -ProgramName "Microsoft.Sysinternals.RAMMap"
     StartProgram -ProgramName "BleachBit.BleachBit"
-    }
-}
-
-###############################
-# Program List and Stored Paths
-$Programs = @(
-    "Microsoft.Sysinternals.RAMMap",
-    "Malwarebytes.Malwarebytes",
-    "BleachBit.BleachBit",
-    "Maxon.CinebenchR23",
-    "CPUID.HWMonitor"
-)
-    # Hash table to store the installation paths for specific programs
-$ProgramPaths = @{}
-
-    # Loop through the list of programs and install them
-function InstallPrograms {
-    foreach ($Program in $Programs) {
-        switch ($Program) {
-            "Microsoft.Sysinternals.RAMMap" {
-            # Try to find both RAMMap.exe and RAMMap64.exe
-                InstalList -Program $Program -ExeName "rammap.exe"
-                $rammap64Path = Get-Command "RAMMap64.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path
-                if ($rammap64Path) {
-                    $ProgramPaths[$Program] = $rammap64Path
-                    Write-Host "RAMMap64.exe found at: $rammap64Path" -ForegroundColor Cyan
-                }
-            }
-            "Malwarebytes.Malwarebytes" {
-            # Try to find both mbam.exe and Malwarebytes.exe
-                InstalList -Program $Program -ExeName "mbam.exe"
-                $malwarebytesPath = Get-Command "Malwarebytes.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path
-                if ($malwarebytesPath) {
-                    $ProgramPaths[$Program] = $malwarebytesPath
-                    Write-Host "Malwarebytes.exe found at: $malwarebytesPath" -ForegroundColor Cyan
-                }
-            }
-            "BleachBit.BleachBit" {
-                InstalList -Program $Program -ExeName "bleachbit.exe"
-            }
-            "Maxon.CinebenchR23" {
-                InstalList -Program $Program -ExeName "Cinebench.exe"
-            }
-            "CPUID.HWMonitor" {
-                InstalList -Program $Program -ExeName "HWMonitor.exe"
-            }
-            default {
-                InstalList -Program $Program
-            }
-        }
-    }
-    Write-Host "Installation Complete." -ForegroundColor Green    
-}
-    # This Function is called in the 'InstallPrograms' Function
-        #Function to Install a Program and Store Its Path 
-    function InstalList {
-        param (
-            [String]$Program,
-            [String]$ExeName  # The name of the executable to find (optional)
-        )
-        Write-Host "Checking for ${Program}..." -ForegroundColor Yellow
-            # Check if the program is already installed
-        $isInstalled = winget list --id $Program -e | Select-String -Pattern $Program
-        if ($isInstalled) {
-            Write-Host "$Program is already installed." -ForegroundColor Green
-            # If an executable name is provided, try to get its path
-            if ($ExeName) {
-                $exePath = Get-Command $ExeName -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path
-                if ($exePath) {
-                    $ProgramPaths[$Program] = $exePath
-                    Write-Host "${Program} path: ${exePath}" -ForegroundColor Cyan
-                } else {
-                    Write-Host "Could not find executable for ${Program}." -ForegroundColor Red
-                }
-            }
-        } 
-        else {
-            Write-Host "Installing ${Program}..." -ForegroundColor Yellow
-            try {
-                winget install --id $Program --silent --accept-package-agreements --accept-source-agreements -e
-                if ($?) {
-                    Write-Host "${Program} installed successfully." -ForegroundColor Green
-                    # Store the executable path if provided
-                    if ($ExeName) {
-                        $exePath = Get-Command $ExeName -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path
-                        if ($exePath) {
-                            $ProgramPaths[$Program] = $exePath
-                            Write-Host "${Program} path: ${exePath}" -ForegroundColor Cyan
-                        } 
-                        else {
-                                Write-Host "Could not find executable for ${Program}." -ForegroundColor Red
-                            }
-                    }
-                }
-                else {
-                    Write-Host "${Program} installation failed." -ForegroundColor Red
-                }
-            } 
-            catch {
-                    Write-Host "Error installing ${Program}: $_" -ForegroundColor Red
-                }
-        }
-    }        
-
-# Function to start a program using its stored path
-function StartProgram {
-    param (
-        [String]$ProgramName
-    )    
-    if ($ProgramPaths.ContainsKey($ProgramName)) {
-        $path = $ProgramPaths[$ProgramName]
-        Write-Host "Starting $ProgramName from $path..." -ForegroundColor Yellow
-        Start-Process $path
-    } elseif ($ProgramName -eq "Malwarebytes.Malwarebytes") {
-        # Attempt to start Malwarebytes as mbam.exe if it's installed
-        $mbamPath = Get-Command "mbam.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path
-        if (-not $mbamPath) {
-            # Check common installation path
-            $commonPath = "C:\Program Files\Malwarebytes\Anti-Malware\mbam.exe"
-            if (Test-Path $commonPath) {
-                $mbamPath = $commonPath
-            }
-        }
-        if ($mbamPath) {
-            Write-Host "Starting Malwarebytes from $mbamPath..." -ForegroundColor Yellow
-            Start-Process $mbamPath
-        }
-        else {
-            Write-Host "Malwarebytes executable not found." -ForegroundColor Red
-        }
-    }
-    elseif ($ProgramName -eq "BleachBit.BleachBit") {
-        # Attempt to start BleachBit as bleachbit.exe if it's installed
-        $bleachbitPath = Get-Command "bleachbit.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path
-        if (-not $bleachbitPath) {
-            # Check common installation path
-            $commonPath = "C:\Program Files\BleachBit\bleachbit.exe"
-            if (Test-Path $commonPath) {
-                $bleachbitPath = $commonPath
-            }
-            else {
-                # Log a message if neither path is found
-                Write-Host "BleachBit not found in PATH or common installation path." -ForegroundColor Red
-            }
-        }
-        if ($bleachbitPath) {
-            Write-Host "Starting BleachBit from $bleachbitPath..." -ForegroundColor Yellow
-            Start-Process $bleachbitPath
-        } 
-        else {
-            Write-Host "BleachBit executable not found." -ForegroundColor Red
-        }
-    } 
-    elseif ($ProgramName -eq "CPUID.HWMonitor") {
-        # Attempt to start HWMonitor as HWMonitor.exe if it's installed
-        $hwmonitorPath = Get-Command "HWMonitor.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path
-        if (-not $hwmonitorPath) {
-            # Check common installation path
-            $commonPath = "C:\Program Files\CPUID\HWMonitor\HWMonitor.exe"
-            $commonPath2 = "$HOME\AppData\Local\Programs\CPUID\HWMonitor\HWMonitor.exe"
-            if (Test-Path $commonPath) {
-                $hwmonitorPath = $commonPath
-            }
-            elseif (Test-Path $commonPath) {
-                $hwmonitorPath = $commonPath2
-            }
-            else {
-                # Log a message if neither path is found
-                Write-Host "HWMonitor not found in PATH or common installation path." -ForegroundColor Red
-            }
-        }
-        if ($hwmonitorPath) {
-            Write-Host "Starting HWMonitor from $bleachbitPath..." -ForegroundColor Yellow
-            Start-Process $hwmonitorPath
-        } 
-        else {
-            Write-Host "HWMonitor executable not found." -ForegroundColor Red
-        }
-    } 
-    elseif ($ProgramName -eq "Maxon.CinebenchR23") {
-        # Attempt to start Cinebench as Cinebench.exe if it's installed
-        $cinebenchPath = Get-Command "Cinebench.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path
-        if (-not $cinebenchPath) {
-            # Check common installation path
-            $commonPath = "C:\Program Files\Maxon Cinebench R23\Cinebench.exe"
-            $commonPath2 = "$HOME\AppData\Local\Programs\Maxon Cinebench R23\Cinebench.exe"
-            if (Test-Path $commonPath) {
-                $cinebenchPath = $commonPath
-            }
-            elseif (Test-Path $commonPath) {
-                $cinebenchPath = $commonPath2
-            }
-            else {
-                # Log a message if neither path is found
-                Write-Host "Cinebench not found in PATH or common installation path." -ForegroundColor Red
-            }
-        }
-        if ($cinebenchPath) {
-            Write-Host "Starting Cinebench from $cinebenchPath..." -ForegroundColor Yellow
-            Start-Process $cinebenchPath
-        } 
-        else {
-            Write-Host "Cinebench executable not found." -ForegroundColor Red
-        }
-    } 
-    else {
-        Write-Host "$ProgramName path not found in stored paths." -ForegroundColor Red
     }
 }
 
