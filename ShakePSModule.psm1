@@ -2,7 +2,6 @@
 ############                        SHAKE'S PowerShell Module                        ############
 #################################################################################################################################
 $UserName = whoami
-
 if ($UserName -ne "shake-mini\shake") {
     InstallPrograms
     Update-PowerShell
@@ -140,7 +139,7 @@ function StartProgram {
         $bleachbitPath = Get-Command "bleachbit.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path
         if (-not $bleachbitPath) {
             $commonPath = "C:\Program Files\BleachBit\bleachbit.exe"
-            $commonPath2 = "$HOST\AppData\Local\Programs\BleachBit\bleachbit.exe"
+            $commonPath2 = "$HOME\AppData\Local\Programs\BleachBit\bleachbit.exe"
             if (Test-Path $commonPath) {
                 $bleachbitPath = $commonPath
             }
@@ -363,7 +362,8 @@ function Set-Cert {
 
 function home { Set-Location -Path $HOME }
 
-function scripts { 
+function scripts {
+    $UserName = whoami 
     if ($UserName -eq "shake-mini\shake") {
         Set-Location -Path D:\Documents\PowerShell\Scripts
     }    
@@ -373,6 +373,7 @@ function scripts {
 }
 
 function dl { 
+    $UserName = whoami
     if ($UserName -eq "shake-mini\shake") {
         Set-Location -Path D:\Downloads
     }
@@ -382,6 +383,7 @@ function dl {
 }
 
 function docs { 
+    $UserName = whoami
     if ($UserName -eq "shake-mini\shake") {
         Set-Location -Path D:\Documents
     }
@@ -481,6 +483,7 @@ function ud {
 
 function vscan {
     # Start Malwarebytes with elevated privileges
+    $UserName = whoami
     if ($UserName -eq "shake-mini\shake") {
         Start-Process -FilePath "D:\Program Files\Malwarebytes.exe" -Verb RunAs
         Write-Host "Starting MalwareBytes..." -ForegroundColor Yellow
@@ -560,6 +563,7 @@ function winstall {
                 # Output selected package details
                 Write-Host "You selected: $AppName -ID:$AppId -Version:$AppVersion" -ForegroundColor DarkYellow        
                 # Get confirmation to install
+                $UserName = whoami
                 if ($UserName -eq "shake-mini\shake") {InstallChoice}
                 else {StandardInstall}
             }
@@ -619,6 +623,7 @@ function InstallChoice {
 }
 
 function bench {
+    $UserName = whoami
     if ($UserName -eq "shake-mini\shake") {
         Write-Host "Starting Cinebench, the '-Z's and HW Monitor..." -ForegroundColor Yellow
         Start-Process -FilePath "D:\WindowsApps\MAXONComputerGmbH.Cinebench_23.2.0.0_x64__rsne5bsk8s7tj\bin\Cinebench.exe"
@@ -636,6 +641,7 @@ function bench {
 
 
 function rmbb {
+    $UserName = whoami
     if ($UserName -eq "shake-mini\shake") {
         Write-Host "Starting BleachBit and RAMMap..." -ForegroundColor Yellow
         Start-Process -FilePath "D:\BleachBit\bleachbit.exe" -Verb RunAs
