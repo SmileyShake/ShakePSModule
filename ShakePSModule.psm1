@@ -720,8 +720,100 @@ function PressEnter {
     return
 }
 
-function Show-Help {
-    @"
+function ZoxSetUp {
+    if (Get-Command zoxide -ErrorAction SilentlyContinue) {
+        Invoke-Expression (& { (zoxide init powershell | Out-String) }) 
+    } 
+    else {
+        Write-Host "zoxide command not found. Attempting to install via winget..." -ForegroundColor Blue
+        try {
+            winget install -e --id ajeetdsouza.zoxide
+            Write-Host "zoxide installed successfully. Initializing..." -ForegroundColor Green
+            Invoke-Expression (& { (zoxide init powershell | Out-String) })
+        }
+        catch {
+            Write-Error "Failed to install zoxide. Error: $_" -ForegroundColor Red
+        }
+    }
+}
+
+# Ensure Terminal-Icons module is installed before importing
+function ModInstall {
+    if (-not (Get-Module -ListAvailable -Name Terminal-Icons)) {
+        Install-Module -Name Terminal-Icons -Scope CurrentUser -Force -SkipPublisherCheck
+    }
+    if (-not (Get-Module -ListAvailable -Name PSFzf)) {
+        Install-Module -Name PSFzf -Scope CurrentUser -Force -SkipPublisherCheck
+    }
+    Import-Module -Name Terminal-Icons
+    Import-Module -Name PSFzf
+    
+    Invoke-FuzzyFasd
+    Invoke-FuzzyZLocation
+    Set-LocationFuzzyEverything
+    Invoke-FzfTabCompletion
+
+    $ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+    if (Test-Path($ChocolateyProfile)) {
+        Import-Module "$ChocolateyProfile"
+    }
+}
+function PSRLsetup {
+    # PowerShell ReadLine 
+    Set-PSReadLineOption -Colors @{
+        Command = 'DarkYellow'
+        Parameter = 'Magenta'
+        String = 'Blue'
+        Comment = 'DarkGray'
+        Keyword = 'DarkMagenta'
+        Number = 'DarkBlue'
+        Operator = 'DarkRed'
+        Variable = 'DarkGreen'
+        Type = 'Blue'
+        Error = 'Red'
+        InlinePrediction = $PSStyle.Foreground.BrightYellow + $PSStyle.Background.BrightBlack
+        Selection = $PSStyle.Background.Blue
+    }
+    
+    Set-PSReadLineKeyHandler -Chord 'Ctrl+f' -Function ForwardWord
+    Set-PSReadLineKeyHandler -Chord 'Enter' -Function ValidateAndAcceptLine
+    Set-PSReadLineOption -EditMode Windows
+    Set-PSReadLineOption -BellStyle None
+    Set-PSReadLineOption -PredictionSource HistoryAndPlugin
+    Set-PSReadLineOption -PredictionViewStyle List
+    Set-PSReadLineOption -HistorySearchCursorMovesToEnd:$True
+    Set-PSReadLineKeyHandler -Key Tab -ScriptBlock { Invoke-FzfTabCompletion }
+    Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' -PSReadlineChordReverseHistory 'Ctrl+r'
+    Set-PSReadLineKeyHandler -Chord "Ctrl+f" -Function ForwardWord
+    #####
+    $scriptblock = {
+        param($wordToComplete, $commandAst, $cursorPosition)
+        dotnet complete --position $cursorPosition $commandAst.ToString() |
+            ForEach-Object {
+                [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
+            }
+    }
+    Register-ArgumentCompleter -Native -CommandName dotnet -ScriptBlock $scriptblock
+}
+
+function AliasSetup {
+    #Set aliases for NeoVim
+    Set-Alias -Name vi -Value nvim -Option AllScope -Scope Global -Force
+    Set-Alias -Name vim -Value nvim -Option AllScope -Scope Global -Force
+    # Set UNIX-like aliases for the admin command, so sudo <command> will run the command with elevated rights.
+    Set-Alias -Name su -Value admin -Option AllScope -Scope Global -Force
+    # Set aliases for Zoxide
+    Set-Alias -Name z -Value __zoxide_z -Option AllScope -Scope Global -Force
+    Set-Alias -Name zi -Value __zoxide_zi -Option AllScope -Scope Global -Force
+    Set-Alias -Name cd -Value z -Option AllScope -Scope Global -Force
+}
+
+ModInstall
+PSRLsetup
+ZoxSetUp
+AliasSetup
+
+function Show-Help { @"
 PowerShell Profile Help
 =======================
 
