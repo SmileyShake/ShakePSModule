@@ -2,29 +2,7 @@
 ############                        SHAKE'S PowerShell Module                        ############
 #################################################################################################################################
 
-function Update-PowerShell {
-    try {
-        Write-Host "Checking for PowerShell updates..." -ForegroundColor Blue
-        $updateNeeded = $false
-        $currentVersion = $PSVersionTable.PSVersion.ToString()
-        $gitHubApiUrl = "https://api.github.com/repos/PowerShell/PowerShell/releases/latest"
-        $latestReleaseInfo = Invoke-RestMethod -Uri $gitHubApiUrl
-        $latestVersion = $latestReleaseInfo.tag_name.Trim('v')
-        if ($currentVersion -lt $latestVersion) {
-            $updateNeeded = $true
-        }
-        if ($updateNeeded) {
-            Write-Host "Updating PowerShell..." -ForegroundColor Yellow
-            winget upgrade "Microsoft.PowerShell" --accept-source-agreements --accept-package-agreements
-            Write-Host "PowerShell has been updated. Please restart your shell to reflect changes" -ForegroundColor Magenta
-        } else {
-            Write-Host "Your PowerShell is up to date." -ForegroundColor Green
-        }
-    } catch {
-        Write-Error "Failed to update PowerShell. Error: $_"
-    }
-}
-
+################### System Utilities #############################
 function Test-CommandExists {
     param($command)
     $exists = $null -ne (Get-Command $command -ErrorAction SilentlyContinue)
@@ -36,28 +14,6 @@ function touch($file) { "" | Out-File $file -Encoding ASCII }
 function ff($name) {
     Get-ChildItem -recurse -filter "*${name}*" -ErrorAction SilentlyContinue | ForEach-Object {
         Write-Output "$($_.FullName)"
-    }
-}
-################### Open WinUtil from Chris Titus Tech   ##################
-function winutil {
-	Invoke-WebRequest -useb https://christitus.com/win | Invoke-Expression
-}
-
-################### System Utilities #############################
-function admin {
-    if ($args.Count -gt 0) {
-        $argList = "& '$args'"
-        Start-Process wt -Verb runAs -ArgumentList "pwsh.exe -NoExit -Command $argList"
-    } else {
-        Start-Process wt -Verb runAs
-    }
-}
-
-function uptime {
-    if ($PSVersionTable.PSVersion.Major -eq 5) {
-        Get-WmiObject win32_operatingsystem | Select-Object @{Name='LastBootUpTime'; Expression={$_.ConverttoDateTime($_.lastbootuptime)}} | Format-Table -HideTableHeaders
-    } else {
-        net statistics workstation | Select-String "since" | ForEach-Object { $_.ToString().Replace('Statistics since ', '') }
     }
 }
 
@@ -111,15 +67,11 @@ function tail {
   Get-Content $Path -Tail $n -Wait:$f
 }
 
-# Quick File Creation
 function nf { param($name) New-Item -ItemType "file" -Path . -Name $name }
 
-# Directory Management
 function mkcd { param($dir) mkdir $dir -Force; Set-Location $dir }
 
-### Quality of Life Aliases
-
-# Navigation Shortcuts
+## Signs PS Scipts locally ##
 function Set-Cert {
    param(
         [Parameter(Mandatory=$true)]
@@ -176,6 +128,43 @@ function docs {
 }
 function dtop { Set-Location -Path $HOME\Desktop }
 
+################### Editing and Reload the Profile ##########
+function ep { code $PROFILE }
+
+function epv { nvim $PROFILE }
+
+function reloadprofile {
+    & $PROFILE
+}
+
+################# Enhanced Listing ############
+function la { Get-ChildItem -Path . -Force | Format-Table -AutoSize }
+function ll { Get-ChildItem -Path . -Force -Hidden | Format-Table -AutoSize }
+
+################ Git Shortcuts #################
+function gs { git status }
+
+function ga { git add . }
+
+function gc { param($m) git commit -m "$m" }
+
+function gp { git push }
+
+function g { __zoxide_z github }
+
+function gcl { git clone "$args" }
+
+function gcom {
+    git add .
+    git commit -m "$args"
+}
+
+function lazyg {
+    git add .
+    git commit -m "$args"
+    git push
+}
+
 ###########  UTILITIES  ##############
 ## Delete Junk Files ##
 function junk {
@@ -193,8 +182,35 @@ function junk {
         # Suppress errors, do nothing
     }
 }
-## Update Winget, Programs and Windows ##
+## Update PowerShell, Winget, Programs and Windows ##
 function ud {
+    psup
+    wgetup
+    winup
+}
+function psup {
+    try {
+        Write-Host "Checking for PowerShell updates..." -ForegroundColor Blue
+        $updateNeeded = $false
+        $currentVersion = $PSVersionTable.PSVersion.ToString()
+        $gitHubApiUrl = "https://api.github.com/repos/PowerShell/PowerShell/releases/latest"
+        $latestReleaseInfo = Invoke-RestMethod -Uri $gitHubApiUrl
+        $latestVersion = $latestReleaseInfo.tag_name.Trim('v')
+        if ($currentVersion -lt $latestVersion) {
+            $updateNeeded = $true
+        }
+        if ($updateNeeded) {
+            Write-Host "Updating PowerShell..." -ForegroundColor Yellow
+            winget upgrade "Microsoft.PowerShell" --accept-source-agreements --accept-package-agreements
+            Write-Host "PowerShell has been updated. Please restart your shell to reflect changes" -ForegroundColor Magenta
+        } else {
+            Write-Host "Your PowerShell is up to date." -ForegroundColor Green
+        }
+    } catch {
+        Write-Error "Failed to update PowerShell. Error: $_"
+    }
+}
+function wgetup {
     if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
         Write-Host "Winget is not installed. Installing Winget now..." -ForegroundColor Blue
         $installerUrl = "https://aka.ms/getwinget"
@@ -243,12 +259,12 @@ function ud {
             Write-Host "An error occurred while installing updates." -ForegroundColor DarkRed
         }
     }
-    # Ensure the PSWindowsUpdate module is available
+}
+function winup {
     if (-not (Get-Module -ListAvailable -Name PSWindowsUpdate)) {
         Write-Host "PSWindowsUpdate module not found. Installing..." -ForegroundColor Green
         Install-Module -Name PSWindowsUpdate -Force -Scope CurrentUser -AllowClobber
     }
-
     Write-Host "Checking for Windows updates..." -ForegroundColor Blue
     Import-Module PSWindowsUpdate
     $updates = Get-WindowsUpdate 
@@ -271,7 +287,9 @@ function vscan {
         Start-Process -FilePath "D:\Program Files\Malwarebytes.exe" -Verb RunAs
         Write-Host "Starting MalwareBytes..." -ForegroundColor Yellow
     }
-    # Update Windows Defender definitions
+    dvs
+}
+function dvs {    
     Update-MpSignature -UpdateSource MicrosoftUpdateServer
     Write-Host "Starting Windows Defender Quick Scan..." -ForegroundColor Blue
     # Start a quick scan
@@ -401,45 +419,18 @@ function InstallChoice {
     }
 }
 
-################### Editing and Reload the Profile ##########
-function ep { code $PROFILE }
-
-function epv { nvim $PROFILE }
-
-function reloadprofile {
-    & $PROFILE
-}
-
-################# Enhanced Listing ############
-function la { Get-ChildItem -Path . -Force | Format-Table -AutoSize }
-function ll { Get-ChildItem -Path . -Force -Hidden | Format-Table -AutoSize }
-
-################ Git Shortcuts #################
-function gs { git status }
-
-function ga { git add . }
-
-function gc { param($m) git commit -m "$m" }
-
-function gp { git push }
-
-function g { __zoxide_z github }
-
-function gcl { git clone "$args" }
-
-function gcom {
-    git add .
-    git commit -m "$args"
-}
-
-function lazyg {
-    git add .
-    git commit -m "$args"
-    git push
-}
 
 ############# System Information ##################
 function sysinfo { Get-ComputerInfo }
+
+function uptime {
+    if ($PSVersionTable.PSVersion.Major -eq 5) {
+        Get-WmiObject win32_operatingsystem | Select-Object @{Name='LastBootUpTime'; Expression={$_.ConverttoDateTime($_.lastbootuptime)}} | Format-Table -HideTableHeaders
+    } else {
+        net statistics workstation | Select-String "since" | ForEach-Object { $_.ToString().Replace('Statistics since ', '') }
+    }
+}
+
 ############# Network Utilities ###################
 ## Get IP Address ##
 function Get-PubIP { (Invoke-WebRequest http://ifconfig.me/ip).Content }
@@ -471,6 +462,7 @@ function cpy { Set-Clipboard $args[0] }
 ## Paste ##
 function pst { Get-Clipboard }
 
+####################### CALL PSInit in your Profile Script to start this section ##############
 ############### SETUP MODULES #################################
 ## Setup Zoxide ##
 function ZoxSetUp {
@@ -568,12 +560,6 @@ function PSInit {
     AliasSetup
 }
 
-##################################################################################
-
-PSInit
-
-##################################################################################
-
 function Show-Help { @"
 PowerShell Profile Help
 =======================
@@ -628,7 +614,9 @@ winstall <package> - Searh for and install 'Package' with winget on D: Drive
 
 vscan - Opens Malwarebytesa and runs a Defender Quick Scan, excludes results for UrBackup
 
-home - Changes the current directory to the SHAKE folder.
+dvs - Runs Defender Quick Scan
+
+home - Changes the current directory to $HOME.
 
 dl- Changes the current directory to the Downloads folder.
 
