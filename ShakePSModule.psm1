@@ -166,6 +166,10 @@ function lazyg {
 }
 
 ###########  UTILITIES  ##############
+# Open Chris Titus WinUtil
+function winutil {
+	iwr -useb https://christitus.com/win | iex
+}
 ## Delete Junk Files ##
 function junk {
     # Clean up temporary files, redirect errors to $null to suppress them
