@@ -485,6 +485,43 @@ function ZoxSetUp {
         }
     }
 }
+## Remove Items from PSReadLine History and PSHistory
+function Remove-PSReadlineHistory {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Pattern
+    )
+
+    $historyPath = (Get-PSReadLineOption).HistorySavePath
+    $historyLines = [System.IO.File]::ReadAllLines($historyPath)
+    $filteredLines = $historyLines | Where-Object { $_ -notmatch $Pattern }
+    [System.IO.File]::WriteAllLines($historyPath, $filteredLines)
+
+    Write-Host "Removed $($historyLines.Count - $filteredLines.Count) line(s) from PSReadLine history."
+}
+
+function Remove-PSHistory {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Pattern
+    )
+    
+    $historyLines = Get-History
+    $matchingLines = $historyLines | Where-Object { $_.CommandLine -match $Pattern }
+    $matchingLines | ForEach-Object { Clear-History -Id $_.Id }
+    Write-Host "Removed $($matchingLines.Count) line(s) from PowerShell history."
+}
+
+function rehis {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Pattern
+    )
+
+    Remove-PSReadlineHistory -Pattern $Pattern
+    Remove-PSHistory -Pattern $Pattern
+}
+
 ## Install Modules ##
 function ModInstall {
     if (-not (Get-Module -ListAvailable -Name Terminal-Icons)) {
@@ -667,6 +704,8 @@ ReNet - Resets Network, requires restart to take effect.
 cpy <text> - Copies the specified text to the clipboard.
 
 pst - Retrieves text from the clipboard.
+
+rehis <String> - Removes command from PSReadLine and PS History
 
 Use 'Show-Help' to display this help message.
 "@
