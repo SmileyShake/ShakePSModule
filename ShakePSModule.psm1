@@ -283,51 +283,7 @@ function winup {
         Write-Host "Windows is up to date." -ForegroundColor Green
     }
 }
-function winuprem {
-    param (
-        [string]$ComputerName,
-        [PSCredential]$Credential
-    )
 
-    # Ensure the remote session is established
-    Write-Host "Connecting to $ComputerName..." -ForegroundColor Cyan
-    $session = New-PSSession -ComputerName $ComputerName -Credential $Credential
-
-    try {
-        # Check if the PSWindowsUpdate module is installed remotely and install it if necessary
-        Invoke-Command -Session $session -ScriptBlock {
-            if (-not (Get-Module -ListAvailable -Name PSWindowsUpdate)) {
-                Write-Host "PSWindowsUpdate module not found on remote machine. Installing..." -ForegroundColor Green
-                Install-Module -Name PSWindowsUpdate -Force -Scope CurrentUser -AllowClobber
-            }
-        }
-
-        # Import the PSWindowsUpdate module and check for updates on the remote machine
-        Invoke-Command -Session $session -ScriptBlock {
-            Write-Host "Checking for Windows updates on $env:COMPUTERNAME..." -ForegroundColor Blue
-            Import-Module PSWindowsUpdate
-            $updates = Get-WindowsUpdate 
-            if ($updates) {
-                Write-Host "The following updates will be installed:" -ForegroundColor Yellow
-                $updates | Format-Table -Property Title, Size, KBArticleIDs
-                Write-Host "Installing Windows updates..." -ForegroundColor Blue
-                Write-Host "The computer may restart automatically." -ForegroundColor DarkRed
-                Install-WindowsUpdate -AcceptAll -AutoReboot
-            }
-            else {
-                Write-Host "Windows is up to date on $env:COMPUTERNAME." -ForegroundColor Green
-            }
-        }
-    }
-    catch {
-        Write-Host "An error occurred: $_" -ForegroundColor Red
-    }
-    finally {
-        # Close the remote session
-        Remove-PSSession -Session $session
-        Write-Host "Disconnected from $ComputerName." -ForegroundColor Cyan
-    }
-}
 ##  Virus Scan  ##
 function vscan {
     # Start Malwarebytes with elevated privileges
