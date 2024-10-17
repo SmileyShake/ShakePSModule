@@ -283,7 +283,7 @@ function winup {
         Write-Host "Windows is up to date." -ForegroundColor Green
     }
 }
-function winup-remote {
+function winuprem {
     param (
         [string]$ComputerName,
         [PSCredential]$Credential
