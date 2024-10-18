@@ -444,6 +444,14 @@ function flushdns {
 	Clear-DnsClientCache
 	Write-Host "DNS has been flushed" -ForegroundColor Green
 }
+## Shows DNS Servers ##
+function showdns {
+     Get-DnsClientServerAddress | 
+     Where-Object { $_.InterfaceIndex -eq 6 } | 
+     Select-Object @{Name = 'AddressFamily'; 
+     Expression = { "IPv$($_.AddressFamily -eq 23 ? 6 : 4)" }},@{Name = 'ServerAddresses'; 
+     Expression = { $_.ServerAddresses -join ', ' }}
+}
 ## Reset Network ##
 function ReNet {
     ipconfig /release
