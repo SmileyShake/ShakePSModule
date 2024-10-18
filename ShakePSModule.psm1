@@ -448,11 +448,12 @@ function flushdns {
 function showdns {
     Get-DnsClientServerAddress | 
     Where-Object { $_.InterfaceAlias -like "Wi-Fi" } | 
-    Select-Object @{
-        Name = 'AddressFamily'; 
-        Expression = { "IPv$($_.AddressFamily -eq 23 ? 6 : 4)" }},@{Name = 'ServerAddresses'; 
-        Expression = { $_.ServerAddresses -join ', ' }
-    }
+    Select-Object @{ Name = 'InterfaceIndex';
+        Expression = { $_InterfaceIndex}},
+        @{ Name = 'AddressFamily'; 
+        Expression = { "IPv$($_.AddressFamily -eq 23 ? 6 : 4)" }},
+        @{ Name = 'ServerAddresses'; 
+        Expression = { $_.ServerAddresses -join ', ' }}
 }
 ## Reset Network ##
 function ReNet {
