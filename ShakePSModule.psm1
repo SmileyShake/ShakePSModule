@@ -449,7 +449,7 @@ function showdns {
     Get-DnsClientServerAddress | 
     Where-Object { $_.InterfaceAlias -like "Wi-Fi" } | 
     Select-Object @{ Name = 'InterfaceIndex';
-        Expression = { [string]$_.InterfaceIndex }},
+        Expression = { $_.InterfaceIndex [string] }},
         @{ Name = 'AddressFamily'; 
         Expression = { "IPv$($_.AddressFamily -eq 23 ? 6 : 4)" }},
         @{ Name = 'ServerAddresses'; 
