@@ -471,6 +471,12 @@ function ReNet {
     Write-Host "Please remember to restart the computer for changes to take effect." -ForegroundColor Yellow
     }
 }
+function teloptout {
+    if ([bool]([System.Security.Principal.WindowsIdentity]::GetCurrent()).IsSystem) {
+        [System.Environment]::SetEnvironmentVariable('POWERSHELL_TELEMETRY_OPTOUT', 'true', 
+        [System.EnvironmentVariableTarget]::Machine)
+    }
+}
 
 ################ Clipboard Utilities ##########################
 ## Copy ##
