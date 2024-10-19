@@ -289,7 +289,7 @@ function vscan {
     # Start Malwarebytes with elevated privileges
     $UserName = whoami
     if ("$UserName" -eq "shake-mini\shake") {
-        Start-Process -FilePath "D:\Program Files\Malwarebytes.exe" -Verb RunAs
+        Start-Process -FilePath "D:\Program Files\Malwarebytes\Malwarebytes.exe" -Verb RunAs
         Write-Host "Starting MalwareBytes..." -ForegroundColor Yellow
     }
     dvs
