@@ -168,7 +168,7 @@ function lazyg {
 ###########  UTILITIES  ##############
 # Open Chris Titus WinUtil
 function winutil {
-	iwr -useb https://christitus.com/win | iex
+	Invoke-WebRequest -useb https://christitus.com/win | Invoke-Expression
 }
 ## Delete Junk Files ##
 function junk {
@@ -451,7 +451,7 @@ function showdns {
     Select-Object @{ Name = 'InterfaceIndex';
         Expression = { [string]$_.InterfaceIndex }},
         @{ Name = 'AddressFamily'; 
-        Expression = { "IPv$($_.AddressFamily -eq 23 ? 6 : 4)" }},
+        Expression = {if ($_.AddressFamily -eq 23) {"IPv6"} else {"IPv4"}}},
         @{ Name = 'ServerAddresses'; 
         Expression = { $_.ServerAddresses -join ', ' }}
 }
