@@ -477,32 +477,6 @@ function teloptout {
         [System.EnvironmentVariableTarget]::Machine)
     }
 }
-
-################ Clipboard Utilities ##########################
-## Copy ##
-function cpy { Set-Clipboard $args[0] }
-## Paste ##
-function pst { Get-Clipboard }
-
-####################### CALL PSInit in your Profile Script to start this section ##############
-############### SETUP MODULES #################################
-## Setup Zoxide ##
-function ZoxSetUp {
-    if (Get-Command zoxide -ErrorAction SilentlyContinue) {
-        Invoke-Expression (& { (zoxide init powershell | Out-String) }) 
-    } 
-    else {
-        Write-Host "zoxide command not found. Attempting to install via winget..." -ForegroundColor Blue
-        try {
-            winget install -e --id ajeetdsouza.zoxide
-            Write-Host "zoxide installed successfully. Initializing..." -ForegroundColor Green
-            Invoke-Expression (& { (zoxide init powershell | Out-String) })
-        }
-        catch {
-            Write-Error "Failed to install zoxide. Error: $_" -ForegroundColor Red
-        }
-    }
-}
 ## Remove Items from PSReadLine History and PSHistory
 function Remove-PSReadlineHistory {
     param (
@@ -539,7 +513,31 @@ function rehis {
     Remove-PSReadlineHistory -Pattern $Pattern
     Remove-PSHistory -Pattern $Pattern
 }
+################ Clipboard Utilities ##########################
+## Copy ##
+function cpy { Set-Clipboard $args[0] }
+## Paste ##
+function pst { Get-Clipboard }
 
+####################### CALL PSInit in your Profile Script to start this section ##############
+############### SETUP MODULES #################################
+## Setup Zoxide ##
+function ZoxSetUp {
+    if (Get-Command zoxide -ErrorAction SilentlyContinue) {
+        Invoke-Expression (& { (zoxide init powershell | Out-String) }) 
+    } 
+    else {
+        Write-Host "zoxide command not found. Attempting to install via winget..." -ForegroundColor Blue
+        try {
+            winget install -e --id ajeetdsouza.zoxide
+            Write-Host "zoxide installed successfully. Initializing..." -ForegroundColor Green
+            Invoke-Expression (& { (zoxide init powershell | Out-String) })
+        }
+        catch {
+            Write-Error "Failed to install zoxide. Error: $_" -ForegroundColor Red
+        }
+    }
+}
 ## Install Modules ##
 function ModInstall {
     if (-not (Get-Module -ListAvailable -Name Terminal-Icons)) {
@@ -724,6 +722,8 @@ cpy <text> - Copies the specified text to the clipboard.
 pst - Retrieves text from the clipboard.
 
 rehis <String> - Removes command from PSReadLine and PS History
+
+teleoptout - Opt out of PowerShell Telemetry, must be Admin.
 
 Use 'Show-Help' to display this help message.
 "@
