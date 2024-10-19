@@ -563,6 +563,7 @@ function ModInstall {
 function PSRLsetup {
     # PowerShell ReadLine 
     Set-PSReadLineOption -Colors @{
+        Emphasis = 'Green'
         Command = 'DarkYellow'
         Parameter = 'Magenta'
         String = 'Blue'
@@ -570,10 +571,11 @@ function PSRLsetup {
         Keyword = 'DarkMagenta'
         Number = 'DarkBlue'
         Operator = 'DarkRed'
-        Variable = 'DarkGreen'
+        Variable = 'Cyan'
         Type = 'Blue'
         Error = 'Red'
         InlinePrediction = $PSStyle.Foreground.BrightYellow + $PSStyle.Background.BrightBlack
+        ListPrediction = 'DarkGreen'
         Selection = $PSStyle.Background.Blue
     }
     
