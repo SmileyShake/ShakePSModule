@@ -569,10 +569,10 @@ function PSRLsetup {
         String = 'Blue'
         Comment = 'DarkGray'
         Keyword = 'DarkMagenta'
-        Number = 'DarkBlue'
+        Number = 'Yellow'
         Operator = 'DarkRed'
         Variable = 'Cyan'
-        Type = 'Blue'
+        Type = 'DarkBlue'
         Error = 'Red'
         InlinePrediction = $PSStyle.Foreground.BrightYellow + $PSStyle.Background.BrightBlack
         ListPrediction = 'DarkGreen'
