@@ -108,6 +108,8 @@ function scripts {
         Set-Location -Path $HOME\Documents\WindowsPowerShell\Scripts 
     }
 }
+function c { Set-Location -Path C:\ }
+function d { Set-Location -Path D:\ }
 function dl { 
     $UserName = whoami
     if ("$UserName" -eq "shake-mini\shake") {
