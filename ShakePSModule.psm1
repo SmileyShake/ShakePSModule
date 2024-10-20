@@ -335,53 +335,48 @@ function winstall {
     param (
         [string]$PackName
     )
-    $SearchResults = winget search $PackName
-    if ($SearchResults -like "*No package found matching input criteria.*") {
+    if (-not $PackName ) {
+        Write-Host "Enter Program to search for:" -ForegroundColor DarkCyan
+        $PackName = Read-Host
+    }
+    $PackID = winget search $PackName | fzf
+    Write-Host $PackID
+    if ($PackID -like "*No package found matching input criteria.*") {
         Write-Host "No package found for '$PackName'." -ForegroundColor Red
         return     
+    }
+    if ($PackID) {
+        $AppId = $PackId | ForEach-Object { ($_ -split '\s+')[1] }
     }   
-    if ($SearchResults) {
-        Write-Host "Search results for '$PackName':" -ForegroundColor Green
-        $SearchResults | Format-Table -AutoSize
+    if (-not $PackID) {
+        Write-Host "Enter ID of the package you want to install:" -ForegroundColor Yellow
+        $AppId = Read-Host
     } 
-    else {
-        Write-Host "No results found for '$PackName'." -ForegroundColor Red
-        return
-    }    
-    # Prompt user for a selection
-    Write-Host "Enter ID of the package you want to install:" -ForegroundColor Yellow
-    $selectedPackId = Read-Host
-    # Validate user input
-    if ($selectedPackId) {
-        try {
-            $AppId = $selectedPackId
-            if (winget list | Where-Object { $_ -like "*$AppId*" }) {
-                Write-Host "$PackName is already installed.  Checking for updates..." -ForegroundColor Yellow
-                winget upgrade --id $AppId --accept-source-agreements --accept-package-agreements
-                return
-            }
-            else {
-                $packageInfo = winget show $AppId
-                # Extract Name and Version
-                $AppVersion = ($packageInfo | Where-Object { $_ -like 'Version:*' }).Split(':')[1].Trim()
-                $FLine = $packageInfo | Where-Object { $_ -match '^Found' }
-                $AppName = ($FLine -split '\[')[0].Replace('Found', '').Trim()        
-                # Output selected package details
-                Write-Host "You selected: $AppName -ID:$AppId -Version:$AppVersion" -ForegroundColor DarkYellow        
-                # Get confirmation to install
-                $UserName = whoami
-                if ("$UserName" -eq "shake-mini\shake") {InstallChoice}
-                else {StandardInstall}
-            }
-        }   
-        catch {
-            Write-Host "Could not install $AppName. Please try again. Error: $_" -ForegroundColor Red
+    try {            
+        if (winget list | Where-Object { $_ -like "*$AppId*" }) {
+            Write-Host "$PackName is already installed.  Checking for updates..." -ForegroundColor Yellow
+            winget upgrade --id $AppId --accept-source-agreements --accept-package-agreements
+            return
         }
+        else {
+            $packageInfo = winget show $AppId
+            # Extract Name and Version
+            $AppVersion = ($packageInfo | Where-Object { $_ -like 'Version:*' }).Split(':')[1].Trim()
+            $FLine = $packageInfo | Where-Object { $_ -match '^Found' }
+            $AppName = ($FLine -split '\[')[0].Replace('Found', '').Trim()        
+            # Output selected package details
+            Write-Host "You selected: $AppName -ID:$AppId -Version:$AppVersion" -ForegroundColor DarkYellow        
+            # Get confirmation to install
+            $UserName = whoami
+            if ("$UserName" -eq "shake-mini\shake") {InstallChoice}
+            else {StandardInstall}
+        }
+    }   
+    catch {
+        Write-Host "Could not install $AppName. Please try again. Error: $_" -ForegroundColor Red
+        return
     }
-    else {
-        Write-Host "Invalid selection. Rerun 'winstall' to try again." -ForegroundColor Red
-    }
-}
+}    
 function StandardInstall {
     try {
         Write-Host "Installing $AppName..." -ForegroundColor Yellow
