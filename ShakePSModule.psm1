@@ -196,7 +196,7 @@ function ud {
 }
 function psup {
     try {
-        Write-Host "Checking for PowerShell updates..." -ForegroundColor Blue
+        Write-Host "Checking for PowerShell Updates..." -ForegroundColor Blue
         $updateNeeded = $false
         $currentVersion = $PSVersionTable.PSVersion.ToString()
         $gitHubApiUrl = "https://api.github.com/repos/PowerShell/PowerShell/releases/latest"
@@ -210,10 +210,10 @@ function psup {
             winget upgrade "Microsoft.PowerShell" --accept-source-agreements --accept-package-agreements
             Write-Host "PowerShell has been updated. Please restart your shell to reflect changes" -ForegroundColor Magenta
         } else {
-            Write-Host "Your PowerShell is up to date." -ForegroundColor Green
+            Write-Host "PowerShell is up to date." -ForegroundColor Green
         }
     } catch {
-        Write-Error "Failed to update PowerShell. Error: $_"
+        Write-Error "Failed to update PowerShell. Error: $_" -ForegroundColor DarkRed
     }
 }
 function wgetup {
@@ -235,7 +235,7 @@ function wgetup {
     $wingetVersion = winget --version
     $wingetUpdateAvailable = winget upgrade --source winget | Where-Object { $_ -match "winget" }
     if ($wingetUpdateAvailable) {
-        Write-Host "Updating Winget to the latest version..." -ForegroundColor Blue
+        Write-Host "Updating Winget..." -ForegroundColor Blue
         try {
             winget upgrade winget --silent
             Write-Host "Winget updated successfully." -ForegroundColor Green
@@ -256,7 +256,7 @@ function wgetup {
         Write-Host "All packages are up to date." -ForegroundColor Green        
     }
     else {
-        Write-Host "The following updates will be installed from Winget:" -ForegroundColor Yellow
+        Write-Host "The following updates will be installed via Winget:" -ForegroundColor Yellow
         try {
             winget upgrade --all
             Write-Host "All updates have been installed successfully." -ForegroundColor Green
@@ -271,7 +271,7 @@ function winup {
         Write-Host "PSWindowsUpdate module not found. Installing..." -ForegroundColor Green
         Install-Module -Name PSWindowsUpdate -Force -Scope CurrentUser -AllowClobber
     }
-    Write-Host "Checking for Windows updates..." -ForegroundColor Blue
+    Write-Host "Checking for Windows Updates..." -ForegroundColor Blue
     Import-Module PSWindowsUpdate
     $updates = Get-WindowsUpdate 
     if ($updates) {
