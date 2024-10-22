@@ -174,19 +174,49 @@ function winutil {
 }
 ## Delete Junk Files ##
 function junk {
-    # Clean up temporary files, redirect errors to $null to suppress them
-    Get-ChildItem -Path $env:TEMP\* -Recurse -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue 2>$null
-    Get-ChildItem -Path 'C:\Windows\Temp\*' -Recurse -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue 2>$null
-    Get-ChildItem -Path 'C:\Windows\Downloaded Program Files\*' -Recurse -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue 2>$null
-    Get-ChildItem -Path 'C:\Windows\Prefetch\*' -Recurse -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue 2>$null
+    $Paths = @(
+        "$env:TEMP\*"
+        "C:\Windows\Temp\*"
+        "C:\Windows\Downloaded Program Files\*"
+        "C:\Windows\Prefetch\*"
+        "C:\ProgramData\Microsoft\Windows\WER\*"
+        "C:\Windows\Minidump\*"
+        "C:\ProgramData\Microsoft\Windows Defender\Scans\History\*"
+        "$env:LOCALAPPDATA\Temp\*"
+        "$HOME\AppData\Local\Microsoft\Windows\INetCache\*"
+        "$HOME\AppData\LocalLow\Sun\Java\Deployment\cache\*"
+        "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Cache\*"
+        "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Cache2\entries\*"
+        "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Cookies"
+        "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Media Cache"
+        "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Cookies-Journal"
+        "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Application Cache\Cache\*"
+        "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\GPUCache\*"
+        "$env:LOCALAPPDATA\Google\Chrome\User Data\ShaderCache\*"
+        "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Network Action Predictor\*"
+        "$env:LOCALAPPDATA\Mozilla\Firefox\Profiles\*\cache2\entries\*"
+        "$env:APPDATA\Mozilla\Firefox\Profiles\*\cookies.sqlite"
+        "$env:LOCALAPPDATA\Mozilla\Firefox\Profiles\*\offlineCache\*"
+        "$env:APPDATA\Mozilla\Firefox\Profiles\*\sessionstore-backups\*"
+        "$env:APPDATA\Mozilla\Firefox\Profiles\*\formhistory.sqlite"
+        "$env:APPDATA\Mozilla\Firefox\Crash Reports\*"
+        "$env:LOCALAPPDATA\Mozilla\Firefox\Crash Reports\pending\*"
+        "$env:APPDATA\Mozilla\Firefox\Profiles\*\content-prefs.sqlite"
+        "$env:APPDATA\Mozilla\Firefox\Profiles\*\security_state"    
+    )   
+    foreach ($Path in $Paths) {
+        Get-ChildItem -Path $Path -Recurse -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue -Verbose
+    }
     # Delete the contents of the SoftwareDistribution folder, suppress errors
     Try {
-        Stop-Service -Name wuauserv -ErrorAction SilentlyContinue 2>$null
-        Get-ChildItem -Path 'C:\Windows\SoftwareDistribution\Download\*' -Recurse -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue 2>$null
-        Start-Service -Name wuauserv -ErrorAction SilentlyContinue 2>$null
-    } Catch {
+        Stop-Service -Name wuauserv -ErrorAction SilentlyContinue 
+        Get-ChildItem -Path 'C:\Windows\SoftwareDistribution\Download\*' -Recurse -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+        Start-Service -Name wuauserv -ErrorAction SilentlyContinue
+    } 
+    Catch {
         # Suppress errors, do nothing
     }
+    Write-Host "Junk Files Deleted." -ForegroundColor Green
 }
 ## Update PowerShell, Winget, Programs and Windows ##
 function ud {
