@@ -174,7 +174,6 @@ function winutil {
 }
 ## Delete Junk Files ##
 function junk {
-    Stop-Service -Name Windefend -Force -ErrorAction SilentlyContinue
     $Paths = @(
         "$env:TEMP\*"
         "C:\Windows\Temp\*"
@@ -182,7 +181,6 @@ function junk {
         "C:\Windows\Prefetch\*"
         "C:\ProgramData\Microsoft\Windows\WER\*"
         "C:\Windows\Minidump\*"
-        "C:\ProgramData\Microsoft\Windows Defender\Scans\History\*"
         "$env:LOCALAPPDATA\Temp\*"
         "$HOME\AppData\Local\Microsoft\Windows\INetCache\*"
         "$HOME\AppData\LocalLow\Sun\Java\Deployment\cache\*"
@@ -208,7 +206,6 @@ function junk {
     foreach ($Path in $Paths) {
         Get-ChildItem -Path $Path -Recurse -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
     }
-    Start-Service -Name Windefend -Force -ErrorAction SilentlyContinue
     # Delete the contents of the SoftwareDistribution folder, suppress errors
     Try {
         Stop-Service -Name wuauserv -ErrorAction SilentlyContinue 
