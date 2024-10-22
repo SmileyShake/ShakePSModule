@@ -174,7 +174,7 @@ function winutil {
 }
 ## Delete Junk Files ##
 function junk {
-    Set-MpPreference -DisableRealtimeMonitoring $true
+    Stop-Service -Name Windefend -Force -ErrorAction SilentlyContinue
     $Paths = @(
         "$env:TEMP\*"
         "C:\Windows\Temp\*"
@@ -208,6 +208,7 @@ function junk {
     foreach ($Path in $Paths) {
         Get-ChildItem -Path $Path -Recurse -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
     }
+    Start-Service -Name Windefend -Force -ErrorAction SilentlyContinue
     # Delete the contents of the SoftwareDistribution folder, suppress errors
     Try {
         Stop-Service -Name wuauserv -ErrorAction SilentlyContinue 
@@ -217,7 +218,6 @@ function junk {
     Catch {
         # Suppress errors, do nothing
     }
-    Set-MpPreference -DisableRealtimeMonitoring $false
     Write-Host "Junk Files Deleted." -ForegroundColor Green
 }
 ## Update PowerShell, Winget, Programs and Windows ##
