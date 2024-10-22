@@ -174,6 +174,7 @@ function winutil {
 }
 ## Delete Junk Files ##
 function junk {
+    Set-MpPreference -DisableRealtimeMonitoring $true
     $Paths = @(
         "$env:TEMP\*"
         "C:\Windows\Temp\*"
@@ -205,7 +206,7 @@ function junk {
         "$env:APPDATA\Mozilla\Firefox\Profiles\*\security_state"    
     )   
     foreach ($Path in $Paths) {
-        Get-ChildItem -Path $Path -Recurse -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue -Verbose
+        Get-ChildItem -Path $Path -Recurse -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
     }
     # Delete the contents of the SoftwareDistribution folder, suppress errors
     Try {
@@ -216,6 +217,7 @@ function junk {
     Catch {
         # Suppress errors, do nothing
     }
+    Set-MpPreference -DisableRealtimeMonitoring $false
     Write-Host "Junk Files Deleted." -ForegroundColor Green
 }
 ## Update PowerShell, Winget, Programs and Windows ##
