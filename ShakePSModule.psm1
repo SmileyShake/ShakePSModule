@@ -335,28 +335,13 @@ function dvs {
     $scanResults = Get-MpThreatDetection
     Write-Host "Scan Complete..." -ForegroundColor Green
     if ($scanResults) {
-        # Filter out specific threats (e.g., threats related to urbackup_srv.exe or ThreatID 2147519003)
-        $filteredResults = $scanResults | Where-Object {
-            $_.ProcessName -notlike '*urbackup_srv.exe*' -and
-            $_.ThreatID -ne 2147519003
-        }
-        if ($filteredResults) {
-            Write-Host "Scan Results:" -ForegroundColor DarkRed
-            foreach ($result in $filteredResults) {
-                Write-Host "Threat Name: $($result.ThreatName)" -ForegroundColor DarkRed
-                Write-Host "Action Taken: $($result.ActionTaken)" -ForegroundColor DarkRed
-                Write-Host "Severity: $($result.Severity)" -ForegroundColor DarkRed
-                Write-Host "------------------------------------------------------------" -ForegroundColor DarkRed
-            }
-        } else {
-            Write-Host "No significant threats detected." -ForegroundColor Green
-        }
-    } 
+        Write-Host "Threats Detected:" -ForegroundColor DarkRed
+        Get-MPThreatDetection
+    }  
     else {
-        Write-Host "No threats detected with Windows Defender." -ForegroundColor Green
+        Write-Host "No threats detected by Windows Defender." -ForegroundColor Green
     }               
 }
-
 ###############################################################################
 # Search and install Winget Package with option to try a new 'D' drive Folder
 ###############################################################################
