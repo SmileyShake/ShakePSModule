@@ -565,6 +565,7 @@ function ModInstall {
     }
     Import-Module -Name Terminal-Icons
     Import-Module -Name PSFzf
+    Import-Module -Name CompletionPredictor
     
     Invoke-FuzzyFasd
     Invoke-FuzzyZLocation
