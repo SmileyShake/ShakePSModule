@@ -376,6 +376,7 @@ function winstall {
     }
     if ($PackID) {
         $AppId = $PackId | ForEach-Object { ($_ -split '\s+')[1] }
+        Write-Host $AppId
     }   
     if (-not $PackID) {
         Write-Host "Enter ID of the package you want to install:" -ForegroundColor Yellow
