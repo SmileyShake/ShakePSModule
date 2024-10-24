@@ -597,7 +597,6 @@ function PSRLsetup {
         Selection = $PSStyle.Background.Blue
     }
     
-    Set-PSReadLineKeyHandler -Chord 'Ctrl+f' -Function ForwardWord
     Set-PSReadLineKeyHandler -Chord 'Enter' -Function ValidateAndAcceptLine
     Set-PSReadLineOption -EditMode Windows
     Set-PSReadLineOption -BellStyle None
