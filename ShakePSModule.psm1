@@ -369,7 +369,8 @@ function winstall {
         $PackName = Read-Host
     }
     $PackID = winget search $PackName | fzf
-    Write-Host $PackID
+    Write-Host "You Selected:" -ForegroundColor -Blue
+    Write-Host $PackID -ForegroundColor -Yellow
     if ($PackID -like "*No package found matching input criteria.*") {
         Write-Host "No package found for '$PackName'." -ForegroundColor Red
         return     
@@ -379,9 +380,8 @@ function winstall {
         ForEach-Object { 
             if ($_ -match '^(.*?) {2,}(\S+).*') { return $matches[2] }       
         }
+        Write-Host $AppId   
     }
-        Write-Host $AppId
-    }   
     if (-not $PackID) {
         Write-Host "Enter ID of the package you want to install:" -ForegroundColor Yellow
         $AppId = Read-Host
