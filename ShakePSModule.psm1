@@ -379,8 +379,7 @@ function winstall {
         $AppId = $PackId | 
         ForEach-Object { 
             if ($_ -match '^(.*?) {2,}(\S+).*') { return $matches[2] }       
-        }
-        Write-Host $AppId   
+        }  
     }
     if (-not $PackID) {
         Write-Host "Enter ID of the package you want to install:" -ForegroundColor Yellow
