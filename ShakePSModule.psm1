@@ -396,8 +396,8 @@ function winstall {
             $FLine = $packageInfo | Where-Object { $_ -match '^Found' }
             $AppName = ($FLine -split '\[')[0].Replace('Found', '').Trim()        
             # Output selected package details
-            Write-Host "You selected:" -ForegroundColor Magenta 
-            Write-Host "$AppName   -ID: $AppId   -Version: $AppVersion" -ForegroundColor Green        
+            Write-Host "You selected:" -ForegroundColor Green
+            Write-Host "$AppName   -ID: $AppId   -Version: $AppVersion" -ForegroundColor DarkMagenta
             # Get confirmation to install
             $UserName = whoami
             if ("$UserName" -eq "shake-mini\shake") {InstallChoice}
