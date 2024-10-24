@@ -576,7 +576,19 @@ function ModInstall {
 }
 ## PS ReadLine Setup ##
 function PSRLsetup {
-    # PowerShell ReadLine 
+    if ($PSVersionTable.PSVersion.Major -eq 7 ) {
+        Set-PSReadLineOption -Colors @{
+            ListPrediction = 'DarkGreen'
+            Selection = $PSStyle.Background.Blue
+            InlinePrediction = $PSStyle.Foreground.BrightYellow + $PSStyle.Background.BrightBlack
+        }
+        if (-not (Get-Module -ListAvailable -Name CompletionPredictor)) {
+            Install-Module -Name CompletionPredictor -Scope CurrentUser -Force -SkipPublisherCheck
+        }
+        Import-Module -Name CompletionPredictor
+        Set-PSReadLineOption -PredictionSource HistoryAndPlugin
+        Set-PSReadLineOption -PredictionViewStyle ListView        
+    }
     Set-PSReadLineOption -Colors @{
         Emphasis = 'Green'
         Command = 'DarkYellow'
@@ -589,7 +601,7 @@ function PSRLsetup {
         Variable = 'Cyan'
         Type = 'DarkBlue'
         Error = 'Red'    
-        Selection = 'DarkCyan'
+        Selection = 'White'
     }
     
     Set-PSReadLineKeyHandler -Chord 'Enter' -Function ValidateAndAcceptLine
@@ -602,22 +614,6 @@ function PSRLsetup {
     Register-ArgumentCompleter -Native -CommandName '*' -ScriptBlock {
         param($commandName, $wordToComplete, $cursorPosition)
         Invoke-CompletionPredictor -WordToComplete $wordToComplete -CursorPosition $cursorPosition
-    }
-    
-    
-    if ($PSVersionTable.PSVersion.Major -eq 7 ) {
-        Set-PSReadLineOption -Colors @{
-            ListPrediction = 'DarkGreen'
-            Selection = $PSStyle.Background.Blue
-            InlinePrediction = $PSStyle.Foreground.BrightYellow + $PSStyle.Background.BrightBlack
-        }
-        if (-not (Get-Module -ListAvailable -Name CompletionPredictor)) {
-            Install-Module -Name CompletionPredictor -Scope CurrentUser -Force -SkipPublisherCheck
-        }
-        Import-Module -Name CompletionPredictor
-        Set-PSReadLineOption -PredictionSource HistoryAndPlugin
-        Set-PSReadLineOption -PredictionViewStyle ListView
-        
     }
 }
 ## Set Aliases ##
