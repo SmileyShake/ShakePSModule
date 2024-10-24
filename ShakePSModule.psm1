@@ -601,11 +601,10 @@ function PSRLsetup {
     Set-PSReadLineOption -EditMode Windows
     Set-PSReadLineOption -BellStyle None
     Set-PSReadLineOption -PredictionSource HistoryAndPlugin
-    Set-PSReadLineOption -PredictionViewStyle InlineView
+    Set-PSReadLineOption -PredictionViewStyle ListView
     Set-PSReadLineOption -HistorySearchCursorMovesToEnd:$True
     Set-PSReadLineKeyHandler -Key Tab -ScriptBlock { Invoke-FzfTabCompletion }
     Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' -PSReadlineChordReverseHistory 'Ctrl+r'
-    Set-PSReadLineKeyHandler -Chord "Ctrl+f" -Function ForwardWord
     #####
     Register-ArgumentCompleter -Native -CommandName '*' -ScriptBlock {
         param($commandName, $wordToComplete, $cursorPosition)
