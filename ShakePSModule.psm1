@@ -560,13 +560,10 @@ function ModInstall {
     if (-not (Get-Module -ListAvailable -Name PSFzf)) {
         Install-Module -Name PSFzf -Scope CurrentUser -Force -SkipPublisherCheck
     }
-    if (-not (Get-Module -ListAvailable -Name CompletionPredictor)) {
-        Install-Module -Name CompletionPredictor -Scope CurrentUser -Force -SkipPublisherCheck
-    }
+    
     Import-Module -Name Terminal-Icons
     Import-Module -Name PSFzf
-    Import-Module -Name CompletionPredictor
-    
+        
     Invoke-FuzzyFasd
     Invoke-FuzzyZLocation
     Set-LocationFuzzyEverything
@@ -593,15 +590,12 @@ function PSRLsetup {
         Type = 'DarkBlue'
         Error = 'Red'
         InlinePrediction = $PSStyle.Foreground.BrightYellow + $PSStyle.Background.BrightBlack
-        ListPrediction = 'DarkGreen'
         Selection = $PSStyle.Background.Blue
     }
     
     Set-PSReadLineKeyHandler -Chord 'Enter' -Function ValidateAndAcceptLine
     Set-PSReadLineOption -EditMode Windows
     Set-PSReadLineOption -BellStyle None
-    Set-PSReadLineOption -PredictionSource HistoryAndPlugin
-    Set-PSReadLineOption -PredictionViewStyle ListView
     Set-PSReadLineOption -HistorySearchCursorMovesToEnd:$True
     Set-PSReadLineKeyHandler -Key Tab -ScriptBlock { Invoke-FzfTabCompletion }
     Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' -PSReadlineChordReverseHistory 'Ctrl+r'
@@ -609,6 +603,19 @@ function PSRLsetup {
     Register-ArgumentCompleter -Native -CommandName '*' -ScriptBlock {
         param($commandName, $wordToComplete, $cursorPosition)
         Invoke-CompletionPredictor -WordToComplete $wordToComplete -CursorPosition $cursorPosition
+    }
+    
+    
+    if ($PSVersionTable.PSVersion.Major -eq 7 ) {
+        Set-PSReadLineOption -Colors @{
+            ListPrediction = 'DarkGreen'
+        }
+        if (-not (Get-Module -ListAvailable -Name CompletionPredictor)) {
+            Install-Module -Name CompletionPredictor -Scope CurrentUser -Force -SkipPublisherCheck
+        }
+        Import-Module -Name CompletionPredictor
+        Set-PSReadLineOption -PredictionSource HistoryAndPlugin
+        Set-PSReadLineOption -PredictionViewStyle ListView
     }
 }
 ## Set Aliases ##
