@@ -369,8 +369,6 @@ function winstall {
         $PackName = Read-Host
     }
     $PackID = winget search $PackName | fzf
-    Write-Host "You Selected:" -ForegroundColor Blue
-    Write-Host "$PackID" -ForegroundColor Yellow
     if ($PackID -like "*No package found matching input criteria.*") {
         Write-Host "No package found for '$PackName'." -ForegroundColor Red
         return     
@@ -387,7 +385,7 @@ function winstall {
     } 
     try {            
         if (winget list | Where-Object { $_ -like "*$AppId*" }) {
-            Write-Host "$PackName is already installed.  Checking for updates..." -ForegroundColor Yellow
+            Write-Host "$AppID is installed.  Checking for updates..." -ForegroundColor Yellow
             winget upgrade --id $AppId --accept-source-agreements --accept-package-agreements
             return
         }
