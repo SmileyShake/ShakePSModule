@@ -560,6 +560,9 @@ function ModInstall {
     if (-not (Get-Module -ListAvailable -Name PSFzf)) {
         Install-Module -Name PSFzf -Scope CurrentUser -Force -SkipPublisherCheck
     }
+    if (-not (Get-Module -ListAvailable -Name CompletionPredictor)) {
+        Install-Module -Name CompletionPredictor -Scope CurrentUser -Force -SkipPublisherCheck
+    }
     Import-Module -Name Terminal-Icons
     Import-Module -Name PSFzf
     
@@ -598,20 +601,16 @@ function PSRLsetup {
     Set-PSReadLineOption -EditMode Windows
     Set-PSReadLineOption -BellStyle None
     Set-PSReadLineOption -PredictionSource HistoryAndPlugin
-    Set-PSReadLineOption -PredictionViewStyle List
+    Set-PSReadLineOption -PredictionViewStyle InlineView
     Set-PSReadLineOption -HistorySearchCursorMovesToEnd:$True
     Set-PSReadLineKeyHandler -Key Tab -ScriptBlock { Invoke-FzfTabCompletion }
     Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' -PSReadlineChordReverseHistory 'Ctrl+r'
     Set-PSReadLineKeyHandler -Chord "Ctrl+f" -Function ForwardWord
     #####
-    $scriptblock = {
-        param($wordToComplete, $commandAst, $cursorPosition)
-        dotnet complete --position $cursorPosition $commandAst.ToString() |
-            ForEach-Object {
-                [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
-            }
+    Register-ArgumentCompleter -Native -CommandName '*' -ScriptBlock {
+        param($commandName, $wordToComplete, $cursorPosition)
+        Invoke-CompletionPredictor -WordToComplete $wordToComplete -CursorPosition $cursorPosition
     }
-    Register-ArgumentCompleter -Native -CommandName dotnet -ScriptBlock $scriptblock
 }
 ## Set Aliases ##
 function AliasSetup {
