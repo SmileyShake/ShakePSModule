@@ -589,7 +589,7 @@ function PSRLsetup {
         Variable = 'Cyan'
         Type = 'DarkBlue'
         Error = 'Red'    
-        Selection = $PSStyle.Background.Blue
+        Selection = 'Blue'
     }
     
     Set-PSReadLineKeyHandler -Chord 'Enter' -Function ValidateAndAcceptLine
