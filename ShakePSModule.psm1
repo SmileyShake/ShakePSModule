@@ -576,19 +576,6 @@ function ModInstall {
 }
 ## PS ReadLine Setup ##
 function PSRLsetup {
-    if ($PSVersionTable.PSVersion.Major -eq 7 ) {
-        Set-PSReadLineOption -Colors @{
-            ListPrediction = 'DarkGreen'
-            Selection = $PSStyle.Background.Blue
-            InlinePrediction = $PSStyle.Foreground.BrightYellow + $PSStyle.Background.BrightBlack
-        }
-        if (-not (Get-Module -ListAvailable -Name CompletionPredictor)) {
-            Install-Module -Name CompletionPredictor -Scope CurrentUser -Force -SkipPublisherCheck
-        }
-        Import-Module -Name CompletionPredictor
-        Set-PSReadLineOption -PredictionSource HistoryAndPlugin
-        Set-PSReadLineOption -PredictionViewStyle ListView        
-    }
     Set-PSReadLineOption -Colors @{
         Emphasis = 'Green'
         Command = 'DarkYellow'
@@ -602,6 +589,19 @@ function PSRLsetup {
         Type = 'DarkBlue'
         Error = 'Red'    
         Selection = 'White'
+    }
+    if ($PSVersionTable.PSVersion.Major -eq 7 ) {
+        Set-PSReadLineOption -Colors @{
+            ListPrediction = 'DarkGreen'
+            Selection = "$($PSStyle.Background.Blue)$($PSStyle.Foreground.White)"
+            InlinePrediction = $PSStyle.Foreground.BrightYellow + $PSStyle.Background.BrightBlack
+        }
+        if (-not (Get-Module -ListAvailable -Name CompletionPredictor)) {
+            Install-Module -Name CompletionPredictor -Scope CurrentUser -Force -SkipPublisherCheck
+        }
+        Import-Module -Name CompletionPredictor
+        Set-PSReadLineOption -PredictionSource HistoryAndPlugin
+        Set-PSReadLineOption -PredictionViewStyle ListView        
     }
     
     Set-PSReadLineKeyHandler -Chord 'Enter' -Function ValidateAndAcceptLine
