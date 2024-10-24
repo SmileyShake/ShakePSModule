@@ -375,7 +375,11 @@ function winstall {
         return     
     }
     if ($PackID) {
-        $AppId = $PackId | ForEach-Object { ($_ -split '\s+')[1] }
+        $AppId = $PackId | 
+        ForEach-Object { 
+            if ($_ -match '^(.*?) {2,}(\S+).*') { return $matches[2] }       
+        }
+    }
         Write-Host $AppId
     }   
     if (-not $PackID) {
