@@ -589,7 +589,7 @@ function PSRLsetup {
         Variable = 'Cyan'
         Type = 'DarkBlue'
         Error = 'Red'    
-        Selection = 'Blue'
+        Selection = 'DarkCyan'
     }
     
     Set-PSReadLineKeyHandler -Chord 'Enter' -Function ValidateAndAcceptLine
@@ -608,6 +608,7 @@ function PSRLsetup {
     if ($PSVersionTable.PSVersion.Major -eq 7 ) {
         Set-PSReadLineOption -Colors @{
             ListPrediction = 'DarkGreen'
+            Selection = $PSStyle.Background.Blue
             InlinePrediction = $PSStyle.Foreground.BrightYellow + $PSStyle.Background.BrightBlack
         }
         if (-not (Get-Module -ListAvailable -Name CompletionPredictor)) {
