@@ -608,6 +608,7 @@ function PSRLsetup {
     if ($PSVersionTable.PSVersion.Major -eq 7 ) {
         Set-PSReadLineOption -Colors @{
             ListPrediction = 'DarkGreen'
+            InlinePrediction = $PSStyle.Foreground.BrightYellow + $PSStyle.Background.BrightBlack
         }
         if (-not (Get-Module -ListAvailable -Name CompletionPredictor)) {
             Install-Module -Name CompletionPredictor -Scope CurrentUser -Force -SkipPublisherCheck
@@ -615,7 +616,7 @@ function PSRLsetup {
         Import-Module -Name CompletionPredictor
         Set-PSReadLineOption -PredictionSource HistoryAndPlugin
         Set-PSReadLineOption -PredictionViewStyle ListView
-        InlinePrediction = $PSStyle.Foreground.BrightYellow + $PSStyle.Background.BrightBlack
+        
     }
 }
 ## Set Aliases ##
