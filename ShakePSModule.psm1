@@ -588,8 +588,7 @@ function PSRLsetup {
         Operator = 'DarkRed'
         Variable = 'Cyan'
         Type = 'DarkBlue'
-        Error = 'Red'
-        InlinePrediction = $PSStyle.Foreground.BrightYellow + $PSStyle.Background.BrightBlack
+        Error = 'Red'    
         Selection = $PSStyle.Background.Blue
     }
     
@@ -616,6 +615,7 @@ function PSRLsetup {
         Import-Module -Name CompletionPredictor
         Set-PSReadLineOption -PredictionSource HistoryAndPlugin
         Set-PSReadLineOption -PredictionViewStyle ListView
+        InlinePrediction = $PSStyle.Foreground.BrightYellow + $PSStyle.Background.BrightBlack
     }
 }
 ## Set Aliases ##
