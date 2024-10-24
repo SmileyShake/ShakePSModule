@@ -370,7 +370,7 @@ function winstall {
     }
     $PackID = winget search $PackName | fzf
     Write-Host "You Selected:" -ForegroundColor Blue
-    Write-Host $PackID -ForegroundColor Yellow
+    Write-Host "$PackID" -ForegroundColor Yellow
     if ($PackID -like "*No package found matching input criteria.*") {
         Write-Host "No package found for '$PackName'." -ForegroundColor Red
         return     
@@ -398,7 +398,8 @@ function winstall {
             $FLine = $packageInfo | Where-Object { $_ -match '^Found' }
             $AppName = ($FLine -split '\[')[0].Replace('Found', '').Trim()        
             # Output selected package details
-            Write-Host "You selected: $AppName -ID:$AppId -Version:$AppVersion" -ForegroundColor DarkYellow        
+            Write-Host "You selected:" -ForegroundColor Blue 
+            Write-Host "$AppName     -ID:$AppId     -Version:$AppVersion" -ForegroundColor DarkYellow        
             # Get confirmation to install
             $UserName = whoami
             if ("$UserName" -eq "shake-mini\shake") {InstallChoice}
