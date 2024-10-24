@@ -396,12 +396,12 @@ function winstall {
             $FLine = $packageInfo | Where-Object { $_ -match '^Found' }
             $AppName = ($FLine -split '\[')[0].Replace('Found', '').Trim()        
             # Output selected package details
-            Write-Host "You selected:" -ForegroundColor Green
+            Write-Host "You selected:" -ForegroundColor Blue
             Write-Host "$AppName   -ID: $AppId   -Version: $AppVersion" -ForegroundColor DarkMagenta
             # Get confirmation to install
             $UserName = whoami
-            if ("$UserName" -eq "shake-mini\shake") {InstallChoice}
-            else {StandardInstall}
+            if ("$UserName" -eq "shake-mini\shake") { InstallChoice }
+            else { StandardInstall }
         }
     }   
     catch {
@@ -420,12 +420,12 @@ function StandardInstall {
     }
 }
 function InstallChoice {
-    Write-Host "Please choose an option for $AppName :" -ForegroundColor Yellow
-    Write-Host "    1. Standard winget installation." -ForegroundColor Cyan
-    Write-Host "    2. Create new folder $AppName in 'D:\Program Files'" -ForegroundColor Cyan
-    Write-Host "       Note: This may revert to the standard installation." -ForegroundColor Red
-    Write-Host "    3. Do Not Install $AppName" -ForegroundColor Cyan
-    $Opt = Read-Host
+    Write-Host "Please choose an option for $AppName :" -ForegroundColor DarkYellow
+    Write-Host "  1. Standard winget installation." -ForegroundColor Cyan
+    Write-Host "  2. Create new folder $AppName in 'D:\Program Files'" -ForegroundColor Cyan
+    Write-Host "     --This may revert to the standard installation--" -ForegroundColor Red
+    Write-Host "  3. Do Not Install $AppName" -ForegroundColor Cyan
+    $Opt = Read-Host 
     if ($Opt -eq '1') {
         StandardInstall
     }
