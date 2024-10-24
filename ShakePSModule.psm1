@@ -369,8 +369,8 @@ function winstall {
         $PackName = Read-Host
     }
     $PackID = winget search $PackName | fzf
-    Write-Host "You Selected:" -ForegroundColor -Blue
-    Write-Host $PackID -ForegroundColor -Yellow
+    Write-Host "You Selected:" -ForegroundColor Blue
+    Write-Host $PackID -ForegroundColor Yellow
     if ($PackID -like "*No package found matching input criteria.*") {
         Write-Host "No package found for '$PackName'." -ForegroundColor Red
         return     
