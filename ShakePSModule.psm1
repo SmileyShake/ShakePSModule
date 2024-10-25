@@ -369,7 +369,7 @@ function winin {
         return
     elseif  (({$YorN -eq 'y'} -or {$YorN -eq 'Y'})) { 
         $UserName = whoami    
-        if ("$UserName" -eq "shake-mini\shake") {
+        if ($UserName -eq "shake-mini\shake") {
         InstallChoice }
         else { StandardInstall }        
         }
