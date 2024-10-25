@@ -355,7 +355,7 @@ function winin {
         Write-Host "No package found for '$PackName'." -ForegroundColor Red
     return
     }         
-    if ($PackID -match '^(.*?) {2,}(\S+) {2,}(\S+).*') {
+    if ($PackID -match '^(.*?)\s+(\S+)\s+(\S+).*') {
         $AppName = $matches[1]
         $AppID  = $matches[2]
         $AppVersion =  $matches[3]
@@ -364,10 +364,10 @@ function winin {
     Write-Host "You Selected:  $AppInfo" -ForegroundColor Green
     Write-Host "Install [y] or [n]?" -ForegroundColor Magenta
     $YorN = Read-Host
-    if ({$YorN -eq 'n'} -or {$YorN -eq 'N'}) {
+    if ($YorN -eq 'n' -or $YorN -eq 'N') {
         Write-Host "$AppInfo was not installed." -ForegroundColor Red
         return
-    elseif  (({$YorN -eq 'y'} -or {$YorN -eq 'Y'})) { 
+    elseif  ( $YorN -eq 'y' -or $YorN -eq 'Y') { 
         $UserName = whoami    
         if ($UserName -eq "shake-mini\shake") {
         InstallChoice }
