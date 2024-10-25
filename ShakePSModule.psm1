@@ -437,6 +437,36 @@ function InstallChoice {
         Write-Host "$AppName was not installed." -ForegroundColor Red
     }
 }
+function winuninstall {
+    Write-Host "Select a Program to Uninstall:" -ForegroundColor DarkCyan
+    $PackID = winget list | fzf
+    Write-Host $PackID
+    if ($PackID -match '^(.*?)\s{2,}(\S+)\s{2,}(\S+).*') {
+            $AppName = $matches[1]
+            $AppID = $matches[2] 
+            $AppVersion = $matches[3]
+            $AppInfo = "$AppName  ( ID: $AppID, Version: $AppVersion )"
+            Write-Host "You Selected: $AppInfo " -ForegroundColor DarkYellow
+        }
+    else {
+        Write-Host "No valid package selected." -ForegroundColor DarkRed
+        return
+    }     
+    Write-Host "Uninstall [y] or [n]?" -ForegroundColor DarkRed
+    $YorN = Read-Host
+
+    if ($YorN -eq 'y' -or $YorN -eq 'Y') {
+        try {
+            winget uninstall --id $AppID --version $AppVersion
+            Write-Host "$AppInfo uninstalled successfully." -ForegroundColor Green
+        }
+        catch {
+            Write-Host "Unable to Uninstall $AppInfo." -ForegroundColor DarkRed
+        }
+    } else {
+        Write-Host "$AppInfo is stil installed." -ForegroundColor Cyan
+    }
+}
 
 
 ############# System Information ##################
