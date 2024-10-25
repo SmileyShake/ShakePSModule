@@ -361,6 +361,10 @@ function winin {
         $AppVersion = $matches[3].Trim()
         $AppInfo = "$AppName  ( ID: $AppID, Version: $AppVersion )"
     }
+    if (-not $AppID) {
+        Write-Host "Failed to parse package info." -ForegroundColor Red
+        return
+    }
     Write-Host "You Selected:  $AppInfo" -ForegroundColor Green
     Write-Host "Install [y] or [n]?" -ForegroundColor Magenta
     $YorN = Read-Host
