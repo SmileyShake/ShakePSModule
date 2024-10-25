@@ -345,7 +345,7 @@ function dvs {
 ###############################################################################
 # Search and install Winget Package with option to try a new 'D' drive Folder
 ###############################################################################
-function winstall {
+function winin {
     param (
         [string]$PackName
     )
@@ -437,7 +437,7 @@ function InstallChoice {
         Write-Host "$AppName was not installed." -ForegroundColor Red
     }
 }
-function winuninstall {
+function winun {
     Write-Host "Select a Program to Uninstall:" -ForegroundColor DarkCyan
     $PackID = winget list | fzf
     Write-Host $PackID
