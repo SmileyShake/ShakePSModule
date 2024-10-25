@@ -353,12 +353,12 @@ function winin {
     Write-Host $PackID
     if ($PackID -like "*No package found matching input criteria.*") {
         Write-Host "No package found for '$PackName'." -ForegroundColor Red
-    return
+        return
     }         
-    if ($PackID -match '^(.*?)\s+(\S+)\s+(\S+).*') {
-        $AppName = $matches[1]
-        $AppID  = $matches[2]
-        $AppVersion =  $matches[3]
+    if ($PackID -match '^(.*?)\s+(\S+\.\S+)\s+([\d\.\w]+)') {
+        $AppName = $matches[1].Trim()
+        $AppID = $matches[2].Trim()
+        $AppVersion = $matches[3].Trim()
         $AppInfo = "$AppName  ( ID: $AppID, Version: $AppVersion )"
     }
     Write-Host "You Selected:  $AppInfo" -ForegroundColor Green
@@ -367,18 +367,20 @@ function winin {
     if ($YorN -eq 'n' -or $YorN -eq 'N') {
         Write-Host "$AppInfo was not installed." -ForegroundColor Red
         return
+    }
     elseif  ( $YorN -eq 'y' -or $YorN -eq 'Y') { 
         $UserName = whoami    
         if ($UserName -eq "shake-mini\shake") {
-        InstallChoice }
-        else { StandardInstall }        
+            InstallChoice 
         }
+        else { 
+            StandardInstall 
+        }        
     }
     else {
         Write-Host "$AppInfo was not installed." -ForegroundColor Red
-        return
     }
-} 
+}
 ## Standard Winget Installation ##
 function StandardInstall {
     try {
