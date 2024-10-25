@@ -364,13 +364,17 @@ function winin {
     Write-Host "You Selected:  $AppInfo" -ForegroundColor Green
     Write-Host "Install [y] or [n]?" -ForegroundColor Magenta
     $YorN = Read-Host
-    if  (({$YorN -eq 'y'} -or  {$YorN -eq 'Y'})) { 
+    if ({$YorN -eq 'n'} -or {$YorN -eq 'N'}) {
+        Write-Host "$AppInfo was not installed." -ForegroundColor Red
+        return
+    elseif  (({$YorN -eq 'y'} -or {$YorN -eq 'Y'})) { 
         $UserName = whoami    
         if ("$UserName" -eq "shake-mini\shake") {
         InstallChoice }
         else { StandardInstall }        
         }
-    catch {
+    }
+    else {
         Write-Host "$AppInfo was not installed." -ForegroundColor Red
         return
     }
