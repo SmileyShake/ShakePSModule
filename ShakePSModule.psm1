@@ -347,13 +347,8 @@ function dvs {
 ###############################################################################
 ## WingetInstall with FZF ##
 function winin {
-    param (
-        [string]$PackName
-    )
-    if (-not $PackName) {
-        Write-Host "Enter Program to Install:" -ForegroundColor Cyan
-        $PackName = Read-Host
-    }
+    Write-Host "Enter Program to Install:" -ForegroundColor Cyan
+    $PackName = Read-Host
     $PackID = winget search $PackName | fzf
     Write-Host $PackID
     if ($PackID -like "*No package found matching input criteria.*") {
@@ -427,14 +422,8 @@ function InstallChoice {
 }
 ## Winget Uninstall with FZF ##
 function winun {
-    param (
-        [string]$PackName
-    )
-    if (-not $PackName) {
-        Write-Host "Enter Program to Install:" -ForegroundColor Cyan
-        $PackName = Read-Host
-    }
-    $PackID = winget list $PackName | fzf
+    Write-Host "Select a Package to Uninstall:" -ForegroundColor Yellow
+    $PackID = winget list | fzf
     Write-Host $PackID
     if ($PackID -match '^(.*?)\s{2,}(\S+)\s{2,}(\S+).*') {
             $AppName = $matches[1]
