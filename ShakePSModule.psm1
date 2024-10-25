@@ -343,71 +343,59 @@ function dvs {
     }               
 }
 ###############################################################################
-# Search and install Winget Package with option to try a new 'D' drive Folder
+# Winget with FZF search and select
 ###############################################################################
+## WingetInstall with FZF ##
 function winin {
     param (
         [string]$PackName
     )
-    if (-not $PackName ) {
-        Write-Host "Enter Program to search for:" -ForegroundColor DarkCyan
+    if (-not $PackName) {
+        Write-Host "Enter Program to Install:" -ForegroundColor Cyan
         $PackName = Read-Host
     }
     $PackID = winget search $PackName | fzf
+    Write-Host $PackID
     if ($PackID -like "*No package found matching input criteria.*") {
         Write-Host "No package found for '$PackName'." -ForegroundColor Red
-        return     
+    return
+    }         
+    if ($PackID -match '^(.*?) {2,}(\S+) {2,}(\S+).*') {
+        $AppName = $matches[1]
+        $AppID  = $matches[2]
+        $AppVersion =  $matches[3]
+        $AppInfo = "$AppName  ( ID: $AppID, Version: $AppVersion )"
     }
-    if ($PackID) {
-        $AppId = $PackId | 
-        ForEach-Object { 
-            if ($_ -match '^(.*?) {2,}(\S+).*') { return $matches[2] }       
-        }  
-    }
-    if (-not $PackID) {
-        Write-Host "Enter ID of the package you want to install:" -ForegroundColor Yellow
-        $AppId = Read-Host
-    } 
-    try {            
-        if (winget list | Where-Object { $_ -like "*$AppId*" }) {
-            Write-Host "$AppID is installed.  Checking for updates..." -ForegroundColor Yellow
-            winget upgrade --id $AppId --accept-source-agreements --accept-package-agreements
-            return
+    Write-Host "You Selected:  $AppInfo" -ForegroundColor Green
+    Write-Host "Install [y] or [n]?" -ForegroundColor Magenta
+    $YorN = Read-Host
+    if  ({$YorN -eq 'y'} -or  {$YorN -eq 'Y'}) {
+        if ("$UserName" -eq "shake-mini\shake") { 
+            InstallChoice }
+        else { 
+            StandardInstall }        
         }
-        else {
-            $packageInfo = winget show $AppId
-            # Extract Name and Version
-            $AppVersion = ($packageInfo | Where-Object { $_ -like 'Version:*' }).Split(':')[1].Trim()
-            $FLine = $packageInfo | Where-Object { $_ -match '^Found' }
-            $AppName = ($FLine -split '\[')[0].Replace('Found', '').Trim()        
-            # Output selected package details
-            Write-Host "You selected:" -ForegroundColor Blue
-            Write-Host "$AppName   -ID: $AppId   -Version: $AppVersion" -ForegroundColor DarkMagenta
-            # Get confirmation to install
-            $UserName = whoami
-            if ("$UserName" -eq "shake-mini\shake") { InstallChoice }
-            else { StandardInstall }
-        }
-    }   
-    catch {
-        Write-Host "Could not install $AppName. Please try again. Error: $_" -ForegroundColor Red
+    else {
+        Write-Host "$AppInfo was not installed." -ForegroundColor Red
         return
     }
-}    
+} 
+## Standard Winget Installation ##
 function StandardInstall {
     try {
         Write-Host "Installing $AppName..." -ForegroundColor Yellow
-        winget install -e --id $AppId --accept-source-agreements --accept-package-agreements
-        Write-Host "$AppName installed successfully." -ForegroundColor Green
+        winget install -e --id $AppId --version $AppVersion --accept-source-agreements --accept-package-agreements
+        Write-Host "$AppInfo installed successfully." -ForegroundColor Green
     }
     catch {
-        Write-Host "Could not install $AppName with winget. Error: $_" -ForegroundColor Red
+        Write-Host "Could not install $AppInfo with winget. Error: $_" -ForegroundColor Red
     }
 }
+## Option to install on D-Drive ##
 function InstallChoice {
-    Write-Host "Please choose an option for $AppName :" -ForegroundColor DarkYellow
+    Write-Host "Please choose an option for $AppInfo :" -ForegroundColor DarkYellow
     Write-Host "  1. Standard winget installation." -ForegroundColor Cyan
-    Write-Host "  2. Create new folder $AppName in 'D:\Program Files'" -ForegroundColor Cyan
+    Write-Host "  2. Create new folder "$AppName" in 'D:\Program Files'" -ForegroundColor Cyan
     Write-Host "     --This may revert to the standard installation--" -ForegroundColor Red
     Write-Host "  3. Do Not Install $AppName" -ForegroundColor Cyan
     $Opt = Read-Host 
@@ -423,23 +411,30 @@ function InstallChoice {
             Start-Process explorer.exe -ArgumentList "$InPath"
             Write-Host "$InPath will remain empty if winget could not set the Destination" -ForegroundColor Red
             Write-Host "Installing $AppName..." -ForegroundColor Yellow
-            winget install -e --id $AppId --location $InPath --accept-source-agreements --accept-package-agreements     
-            Write-Host "$AppName installed successfully." -ForegroundColor Green             
+            winget install -e --id $AppId --version $AppVersion --location $InPath --accept-source-agreements --accept-package-agreements     
+            Write-Host "$AppInfo installed successfully." -ForegroundColor Green             
         }
         catch {
-            Write-Host "Could not install $AppName with winget. Error: $_" -ForegroundColor Red
+            Write-Host "Could not install $AppInfo with winget. Error: $_" -ForegroundColor Red
         }    
     }
     elseif ($Opt -eq '3') {
-        Write-Host "$AppName was not installed." -ForegroundColor Red
+        Write-Host "$AppInfo was not installed." -ForegroundColor Red
     }
     else {
-        Write-Host "$AppName was not installed." -ForegroundColor Red
+        Write-Host "$AppInfo was not installed." -ForegroundColor Red
     }
 }
+## Winget Uninstall with FZF ##
 function winun {
-    Write-Host "Select a Program to Uninstall:" -ForegroundColor DarkCyan
-    $PackID = winget list | fzf
+    param (
+        [string]$PackName
+    )
+    if (-not $PackName) {
+        Write-Host "Enter Program to Install:" -ForegroundColor Cyan
+        $PackName = Read-Host
+    }
+    $PackID = winget list $PackName | fzf
     Write-Host $PackID
     if ($PackID -match '^(.*?)\s{2,}(\S+)\s{2,}(\S+).*') {
             $AppName = $matches[1]
