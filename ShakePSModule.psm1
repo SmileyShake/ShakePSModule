@@ -434,17 +434,16 @@ function InstallChoice {
 function winun {
     Write-Host "Select a Package to Uninstall:" -ForegroundColor Yellow
     $searchID = winget list 
-    $fzfID = $searchID -replace 'ΓÇª', '…' -replace 'ΓÇô','…' -replace '┬«','®' | fzf
-    if ($fzfID -contains 'ΓÇª') { $fzfID =  $fzfID -replace 'ΓÇª','… ' } 
-    if ($fzfID -contains 'ΓÇô') { $fzfID =  $fzfID -replace 'ΓÇô','… ' } 
-    if ($fzfID -contains '┬«') { $fzfID =  $fzfID -replace '┬«','®' } 
-    $PackID = { $fzfID }
+    $PackID = $searchID -replace 'ΓÇª', ' ' -replace 'ΓÇô',' ' -replace '┬«',' ' | fzf
     Write-Host $PackID
     if ($PackID -match '^(.\S+)\s{2,}(\S+)\s{2,}(\S+)\s{2}.*') {
-        $AppName = $matches[1]
-        $AppID = $matches[2]
-        $AppVersion = $matches[3]
-        $AppInfo = "$AppName  ( ID: $AppID, Version: $AppVersion )"
+        $PackName = $matches[1]
+        $PackIDId = $matches[2]
+        $PackVersion = $matches[3]
+        $AppName = $PackName -replace 'ΓÇª', '…' -replace 'ΓÇô','…' -replace '┬«','®' 
+        $AppID = $PackIDId -replace 'ΓÇª', '…' -replace 'ΓÇô','…' -replace '┬«','®'
+        $AppVersion = $PackVersion -replace 'ΓÇª', '…' -replace 'ΓÇô','…' -replace '┬«','®'
+        $AppInfo = "$AppName  ( ID: $AppID | Version: $AppVersion )"
         Write-Host "You Selected: $AppInfo " -ForegroundColor DarkYellow
     }
     else {
