@@ -435,12 +435,12 @@ function winun {
     Write-Host "Select a Package to Uninstall:" -ForegroundColor Yellow
     $searchID = winget list 
     $fzfID = $searchID -replace 'ΓÇª', '…' -replace 'ΓÇô','…' -replace '┬«','®' | fzf
-    if ($fzfID -eq '*ΓÇª*') { $fzfID =  $fzfID -replace 'ΓÇª','… ' } 
-    if ($fzfID -eq '*ΓÇô*') { $fzfID =  $fzfID -replace 'ΓÇô','… ' } 
-    if ($fzfID -eq '*┬«*') { $fzfID =  $fzfID -replace '┬«','®' } 
-    if ($fzfID -ne '*ΓÇª*' -and $fzfID -ne '*ΓÇô*' -and $fzfID -ne '*┬«*') {$PackID = $fzfID }
+    if ($fzfID -contains 'ΓÇª') { $fzfID =  $fzfID -replace 'ΓÇª','… ' } 
+    if ($fzfID -contains 'ΓÇô') { $fzfID =  $fzfID -replace 'ΓÇô','… ' } 
+    if ($fzfID -contains '┬«') { $fzfID =  $fzfID -replace '┬«','®' } 
+    $PackID = { $fzfID }
     Write-Host $PackID
-    if ($PackID -match '^(.*?)\s{2,}(\S+)\s{2,}(\S+).*') {
+    if ($PackID -match '^(.\S+)\s{2,}(\S+)\s{2,}(\S+)\s{2}.*') {
         $AppName = $matches[1]
         $AppID = $matches[2]
         $AppVersion = $matches[3]
