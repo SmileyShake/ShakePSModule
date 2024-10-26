@@ -435,8 +435,8 @@ function winun {
     Write-Host "Select a Package to Uninstall:" -ForegroundColor Yellow
     $searchID = winget list 
     $fzfID = $searchID -replace 'ΓÇª', '…' -replace 'ΓÇô','…' -replace '┬«','®' | fzf
-    if ($fzfID -like  "*ΓÇª*") { $PackID =  $fzfID -replace 'ΓÇª','… ' } -or
-    if ($fzfID -like  "*ΓÇô*") { $PackID =  $fzfID -replace 'ΓÇô','… ' } -or
+    if ($fzfID -like  "*ΓÇª*") { $PackID =  $fzfID -replace 'ΓÇª','… ' } 
+    if ($fzfID -like  "*ΓÇô*") { $PackID =  $fzfID -replace 'ΓÇô','… ' } 
     if ($fzfID -like  "*┬«*") { $PackID =  $fzfID -replace '┬«','®' } 
     else{ $PackID = $fzfID }
     Write-Host $PackID
