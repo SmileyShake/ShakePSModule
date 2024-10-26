@@ -434,7 +434,10 @@ function InstallChoice {
 function winun {
     Write-Host "Select a Package to Uninstall:" -ForegroundColor Yellow
     $searchID = winget list 
-    $PackID = $searchID -replace 'ΓÇª', ' ' -replace '┬«',' ' -replace 'ΓÇô',' '| fzf
+    $fzfID = $searchID -replace 'ΓÇª', '…' -replace 'ΓÇô','…' -replace '┬«','®' | fzf
+    if ($fzfID -like  "ΓÇª") { $PackID =  $fzfID -replace 'ΓÇª','… ' }
+    if ($fzfID -like  "ΓÇô") { $PackID =  $fzfID -replace 'ΓÇô','… ' } 
+    if ($fzfID -like  "┬«") { $PackID =  $fzfID -replace '┬«','®' } 
     Write-Host $PackID
     if ($PackID -match '^(.*?)\s{2,}(\S+)\s{2,}(\S+).*') {
             $AppName = $matches[1]
