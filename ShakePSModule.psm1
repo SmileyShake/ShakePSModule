@@ -433,7 +433,8 @@ function InstallChoice {
 ## Winget Uninstall with FZF ##
 function winun {
     Write-Host "Select a Package to Uninstall:" -ForegroundColor Yellow
-    $PackID = winget list | fzf
+    $searchID = winget list 
+    $PackID = $searchID -replace 'ΓÇª', ' ' -replace '┬«',' ' -replace 'ΓÇô',' '| fzf
     Write-Host $PackID
     if ($PackID -match '^(.*?)\s{2,}(\S+)\s{2,}(\S+).*') {
             $AppName = $matches[1]
