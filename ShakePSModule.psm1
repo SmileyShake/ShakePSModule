@@ -433,39 +433,57 @@ function InstallChoice {
 ## Winget Uninstall with FZF ##
 function winun {
     Write-Host "Select a Package to Uninstall:" -ForegroundColor Yellow
-    $searchID = winget list 
-    $PackID = $searchID -replace 'ΓÇª', ' ' -replace 'ΓÇô',' ' -replace '┬«',' ' | fzf
-    Write-Host $PackID
-    if ($PackID -match '^(.\S+)\s{2,}(\S+)\s{2,}(\S+)\s{2}.*') {
-        $PackName = $matches[1]
-        $PackIDId = $matches[2]
-        $PackVersion = $matches[3]
-        $AppName = $PackName -replace 'ΓÇª', '…' -replace 'ΓÇô','…' -replace '┬«','®' 
-        $AppID = $PackIDId -replace 'ΓÇª', '…' -replace 'ΓÇô','…' -replace '┬«','®'
-        $AppVersion = $PackVersion -replace 'ΓÇª', '…' -replace 'ΓÇô','…' -replace '┬«','®'
-        $AppInfo = "$AppName  ( ID: $AppID | Version: $AppVersion )"
-        Write-Host "You Selected: $AppInfo " -ForegroundColor DarkYellow
-    }
-    else {
+
+    # Capture selected package output from fzf
+    $PackID = winget list | fzf
+
+    # Apply replacements to correct encoding issues
+    $PackID = $PackID -replace '┬«', '®' -replace 'ΓÇô', '-' -replace 'ΓÇª', ' '
+
+    # Display the selected package after replacements for debugging
+    Write-Host "Selected Package Raw Output (Post-Replacements): $PackID"
+
+    # Use regex to capture Name, ID, and Version
+    if ($PackID -match '^(.*?)\s{2,}([^\s]+)\s{2,}(.+?)(?=\s{2,}|$)') {
+                        
+        $Global:AppName = $matches[1].Trim()
+        $Global:AppID = $matches[2].Trim()
+        $Global:AppVersion = $matches[3].Trim()
+
+        # Construct the AppInfo output
+        $Global:AppInfo = "$Global:AppName (ID: $Global:AppID, Version: $Global:AppVersion)"
+        Write-Host "You Selected: $Global:AppInfo" -ForegroundColor DarkYellow
+        winuncheck
+    } else {
         Write-Host "No valid package selected." -ForegroundColor DarkRed
         return
-    }     
-    Write-Host "Uninstall [y] or [n]?" -ForegroundColor DarkRed
-    $YorN = Read-Host
-
-    if ($YorN -eq 'y' -or $YorN -eq 'Y') {
-        try {
-            winget uninstall --id $AppID --version $AppVersion
-            Write-Host "$AppInfo uninstalled successfully." -ForegroundColor Green
-        }
-        catch {
-            Write-Host "Unable to Uninstall $AppInfo." -ForegroundColor DarkRed
-        }
-    } else {
-        Write-Host "$AppInfo is stil installed." -ForegroundColor Cyan
     }
 }
 
+function winuncheck {
+    Write-Host "Uninstall [y] or [n]?" -ForegroundColor DarkRed
+    $YorN = Read-Host
+
+    if ($YorN -match '^[Yy]$') {
+        try {
+            # Include the version argument only if it exists
+            $command = if ($Global:AppVersion) {
+                "winget uninstall --id $Global:AppID --version $Global:AppVersion"
+            } else {
+                "winget uninstall --id $Global:AppID"
+            }
+
+            # Execute the uninstall command
+            Invoke-Expression $command
+            Write-Host "$Global:AppInfo uninstalled successfully." -ForegroundColor Green
+        }
+        catch {
+            Write-Host "Unable to Uninstall $Global:AppInfo." -ForegroundColor DarkRed
+        }
+    } else {
+        Write-Host "$Global:AppInfo is still installed." -ForegroundColor Cyan
+    }
+}
 
 ############# System Information ##################
 function sysinfo { Get-ComputerInfo }
