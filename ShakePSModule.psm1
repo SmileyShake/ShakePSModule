@@ -456,6 +456,10 @@ function winun {
         winuncheck
     } else {
         Write-Host "No valid package selected." -ForegroundColor DarkRed
+        Remove-Variable -Name AppName -Scope Global -ErrorAction SilentlyContinue
+        Remove-Variable -Name AppID -Scope Global -ErrorAction SilentlyContinue
+        Remove-Variable -Name AppVersion -Scope Global -ErrorAction SilentlyContinue
+        Remove-Variable -Name AppInfo -Scope Global -ErrorAction SilentlyContinue
         return
     }
 }
@@ -483,6 +487,10 @@ function winuncheck {
     } else {
         Write-Host "$Global:AppInfo is still installed." -ForegroundColor Cyan
     }
+    Remove-Variable -Name AppName -Scope Global -ErrorAction SilentlyContinue
+    Remove-Variable -Name AppID -Scope Global -ErrorAction SilentlyContinue
+    Remove-Variable -Name AppVersion -Scope Global -ErrorAction SilentlyContinue
+    Remove-Variable -Name AppInfo -Scope Global -ErrorAction SilentlyContinue
 }
 
 ############# System Information ##################
