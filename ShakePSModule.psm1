@@ -206,6 +206,15 @@ function junk {
     foreach ($Path in $Paths) {
         Get-ChildItem -Path $Path -Recurse -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
     }
+    # Stop any running Microsoft Store processes
+    try {
+        Stop-Process -Name WinStore.App -ErrorAction SilentlyCont
+        $cachePath = "$env:LocalAppData\Packages\Microsoft.WindowsStore_8wekyb3d8bbwe\LocalCache"
+        Remove-Item -Path $cachePath\* -Recurse -Force        
+    }
+    catch {
+        # Suppress errors, do nothing
+    }
     # Delete the contents of the SoftwareDistribution folder, suppress errors
     Try {
         Stop-Service -Name wuauserv -ErrorAction SilentlyContinue 
