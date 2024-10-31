@@ -510,8 +510,9 @@ function winuncheck {
     $YorN = Read-Host
 
     if ($YorN -match '^[Yy]$') {
+
+            $command = "winget uninstall  --id $Global:AppID"
         try {
-            $command = "winget uninstall --name $Global:AppName --id $Global:AppID"
             Invoke-Expression $command
             Write-Host "$Global:AppInfo uninstalled successfully." -ForegroundColor Green
         }
@@ -519,7 +520,7 @@ function winuncheck {
             Write-Host "Unable to Uninstall $Global:AppInfo." -ForegroundColor DarkRed
         }
     } else {
-        Write-Host "$Global:AppInfo is still installed." -ForegroundColor Cyan
+        Write-Host "$Global:AppInfo is still installed." -ForegroundColor Blue
     }
     Remove-Variable -Name AppName -Scope Global -ErrorAction SilentlyContinue
     Remove-Variable -Name AppID -Scope Global -ErrorAction SilentlyContinue
