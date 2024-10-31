@@ -644,16 +644,23 @@ function ZoxSetUp {
 }
 ## Install Modules ##
 function ModInstall {
-    if (-not (Get-Module -ListAvailable -Name Terminal-Icons)) {
-        Install-Module -Name Terminal-Icons -Scope CurrentUser -Force -SkipPublisherCheck
+    $modName = @(
+        "PowerShellGet"
+        "DnsClient"
+        "Terminal-Icons"
+        "PSReadLine"
+        "PSFzf"
+        "Microsoft.Winget.Client"
+        "CompletionPredictor"
+        "PowerShell.Predictor"
+        "oh-my-posh-core"
+    )
+    foreach ($mod in $modName) {
+    if (-not (Get-Module -ListAvailable -Name $mod)) {
+        Install-Module -Name $mod -Scope CurrentUser -Force -SkipPublisherCheck
     }
-    if (-not (Get-Module -ListAvailable -Name PSFzf)) {
-        Install-Module -Name PSFzf -Scope CurrentUser -Force -SkipPublisherCheck
-    }
-    
-    Import-Module -Name Terminal-Icons
-    Import-Module -Name PSFzf
-        
+    Import-Module -Name $mod
+    }        
     Invoke-FuzzyFasd
     Invoke-FuzzyZLocation
     Set-LocationFuzzyEverything
@@ -689,7 +696,6 @@ function PSRLsetup {
         if (-not (Get-Module -ListAvailable -Name CompletionPredictor)) {
             Install-Module -Name CompletionPredictor -Scope CurrentUser -Force -SkipPublisherCheck
         }
-        Import-Module -Name CompletionPredictor
         Set-PSReadLineOption -PredictionSource HistoryAndPlugin
         Set-PSReadLineOption -PredictionViewStyle ListView        
     }
