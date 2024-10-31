@@ -652,8 +652,6 @@ function ModInstall {
         "PSFzf"
         "Microsoft.Winget.Client"
         "CompletionPredictor"
-        "PowerShell.Predictor"
-        "oh-my-posh-core"
     )
     foreach ($mod in $modName) {
     if (-not (Get-Module -ListAvailable -Name $mod)) {
