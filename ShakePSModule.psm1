@@ -511,14 +511,7 @@ function winuncheck {
 
     if ($YorN -match '^[Yy]$') {
         try {
-            # Include the version argument only if it exists
-            $command = if ($Global:AppVersion) {
-                "winget uninstall --name $Global:AppName --id $Global:AppID --version $Global:AppVersion"
-            } else {
-                "winget uninstall --name $Global:AppName --id $Global:AppID"
-            }
-
-            # Execute the uninstall command
+            $command = "winget uninstall --name $Global:AppName --id $Global:AppID"
             Invoke-Expression $command
             Write-Host "$Global:AppInfo uninstalled successfully." -ForegroundColor Green
         }
