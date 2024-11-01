@@ -372,17 +372,17 @@ function winselect {
 
     $formattedPackages = $packages | ForEach-Object {
         if ($_.Version){
-            "$($_.Name)`t`t-- $($_.Version)`t`t--$($_.Id)"
+            "$($_.Name)`t`t-- $($_.Version)`t`t-- $($_.Id)"
         }
         if ($_.InstalledVersion) {
-        "$($_.Name)`t`t--$($_.InstalledVersion)`t`t--$($_.Id)"
+        "$($_.Name)`t`t-- $($_.InstalledVersion)`t`t-- $($_.Id)"
         }
     }
 
     $selectedApp = $formattedPackages | fzf --prompt="Select a package: "
     
     if ($selectedApp) {
-        $selectedId = $selectedApp -split "`t`t--" | Select-Object -Last 1
+        $selectedId = $selectedApp -split "`t`t-- " | Select-Object -Last 1
         $selectedApp = $packages | Where-Object { $_.Id -eq $selectedId }
     
         $selectedApp | ForEach-Object {
