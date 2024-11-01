@@ -358,6 +358,7 @@ function dvs {
 function winpick {
     param ( $WingetCommand
         )
+    Clear-GlobalAppVariables
     if (-not $WingetCommand) {
         Write-Host "Enter Package To Search For:" -ForegroundColor Blue
         $PackName =  Read-Host
