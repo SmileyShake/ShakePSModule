@@ -355,38 +355,67 @@ function dvs {
 # Winget with FZF search and select
 ###############################################################################
 ## WingetInstall with FZF ##
+function winselect {
+    param ( $WingetCommand
+        )
+    $packages = $WingetCommand | ForEach-Object {
+        [PSCustomObject]@{
+            Name               = $_.Name
+            Id                 = $_.Id
+            Version            = $_.Version
+            InstalledVersion   = $_.InstalledVersion 
+            IsUpdateAvailable  = $_.IsUpdateAvailable
+            Source             = $_.Source
+            AvailableVersions  = ($_.AvailableVersions | Select-Object -First 5) -join ', '
+        }
+    }
+
+    $formattedPackages = $packages | ForEach-Object {
+        if ($_.Version){
+            "$($_.Name)`t`t-- $($_.Version)`t`t--$($_.Id)"
+        }
+        if ($_.InstalledVersion) {
+        "$($_.Name)`t`t--$($_.InstalledVersion)`t`t--$($_.Id)"
+        }
+    }
+
+    $selectedApp = $formattedPackages | fzf --prompt="Select a package: "
+    
+    if ($selectedApp) {
+        $selectedId = $selectedApp -split "`t`t--" | Select-Object -Last 1
+        $selectedApp = $packages | Where-Object { $_.Id -eq $selectedId }
+    
+        $selectedApp | ForEach-Object {
+            $Global:AppName = $($_.Name) 
+            $Global:AppVersion = $($_.InstalledVersion ?? $_.Version) 
+            $Global:AppId = $($_.Id)
+            $Global:AppInfo = "$Global:AppName  (Id: $Global:AppId | Version: $Global:AppVersion)"
+        }
+    Write-Output "You selected:"
+    $Global:FullAppInfo = $selectedApp | Format-List   
+    Write-Output $Global:FullAppInfo
+    }
+    return
+}
 function winin {
     Write-Host "Enter Program to Install:" -ForegroundColor Cyan
     $PackName = Read-Host
-    $PackID = winget search $PackName | fzf
-    Write-Host $PackID
-    if ($PackID -like "*No package found matching input criteria.*") {
-        Write-Host "No package found for '$PackName'." -ForegroundColor Red
-        return
-    }         
-    if ($PackID -match '^(.*?)\s+(\S+\.\S+)\s+([\d\.\w]+)') {
-        $Global:AppName = $matches[1].Trim()
-        $Global:AppID = $matches[2].Trim()
-        $Global:AppVersion = $matches[3].Trim()
-        $Global:AppInfo = "$Global:AppName  ( ID: $Global:AppID, Version: $Global:AppVersion )"
-    }
-    if (-not $Global:AppID) {
-        Write-Host "Failed to parse package info." -ForegroundColor Red
-        Remove-Variable -Name AppName -Scope Global -ErrorAction SilentlyContinue
-        Remove-Variable -Name AppID -Scope Global -ErrorAction SilentlyContinue
-        Remove-Variable -Name AppVersion -Scope Global -ErrorAction SilentlyContinue
-        Remove-Variable -Name AppInfo -Scope Global -ErrorAction SilentlyContinue
+    $PackID = Find-WinGetPackage $PackName 
+    if (-not $PackID) {
+        Write-Host "No Packages found." -ForegroundColor Red
         return
     }
-    Write-Host "You Selected:  $Global:AppInfo" -ForegroundColor Green
+    winselect $PackID
+    if  (-not $Global:AppName) {
+        Write-Host "No Package Selected." -ForegroundColor Red
+        Clear-GlobalAppVariables
+        return
+        }
     Write-Host "Install [y] or [n]?" -ForegroundColor Magenta
     $YorN = Read-Host
     if ($YorN -match '^[Nn]$') {
         Write-Host "$Global:AppInfo was not installed." -ForegroundColor Red
-        Remove-Variable -Name AppName -Scope Global -ErrorAction SilentlyContinue
-        Remove-Variable -Name AppID -Scope Global -ErrorAction SilentlyContinue
-        Remove-Variable -Name AppVersion -Scope Global -ErrorAction SilentlyContinue
-        Remove-Variable -Name AppInfo -Scope Global -ErrorAction SilentlyContinue
+        Clear-GlobalAppVariables
         return
     }
     elseif  ( $YorN -match '^[Yy]$') { 
@@ -400,27 +429,22 @@ function winin {
     }
     else {
         Write-Host "$Global:AppInfo was not installed." -ForegroundColor Red
-        Remove-Variable -Name AppName -Scope Global -ErrorAction SilentlyContinue
-        Remove-Variable -Name AppID -Scope Global -ErrorAction SilentlyContinue
-        Remove-Variable -Name AppVersion -Scope Global -ErrorAction SilentlyContinue
-        Remove-Variable -Name AppInfo -Scope Global -ErrorAction SilentlyContinue
+        Clear-GlobalAppVariables
+        return
     }
 }
 ## Standard Winget Installation ##
 function StandardInstall {
     try {
         Write-Host "Installing $Global:AppName..." -ForegroundColor Yellow
-        winget install -e --id $Global:AppId --version $Global:AppVersion --accept-source-agreements --accept-package-agreements
+        winget install --id $Global:AppId --accept-source-agreements --accept-package-agreements --silent
         Write-Host "$Global:AppInfo installed successfully." -ForegroundColor Green
     }
     catch {
         Write-Host "Could not install $Global:AppInfo with winget. Error: $_" -ForegroundColor Red
     }
     finally {
-        Remove-Variable -Name AppName -Scope Global -ErrorAction SilentlyContinue
-        Remove-Variable -Name AppID -Scope Global -ErrorAction SilentlyContinue
-        Remove-Variable -Name AppVersion -Scope Global -ErrorAction SilentlyContinue
-        Remove-Variable -Name AppInfo -Scope Global -ErrorAction SilentlyContinue
+        Clear-GlobalAppVariables
     }
     return
 }
@@ -444,17 +468,14 @@ function InstallChoice {
             Start-Process explorer.exe -ArgumentList "$InPath"
             Write-Host "$InPath will remain empty if winget could not set the Destination" -ForegroundColor Red
             Write-Host "Installing $Global:AppName..." -ForegroundColor Yellow
-            winget install -e --id $Global:AppId --version $Global:AppVersion --location $InPath --accept-source-agreements --accept-package-agreements     
+            winget install --id $Global:AppId --location $InPath --accept-source-agreements --accept-package-agreements --silent
             Write-Host "$Global:AppInfo installed successfully." -ForegroundColor Green             
         }
         catch {
             Write-Host "Could not install $Global:AppInfo with winget. Error: $_" -ForegroundColor Red
         }
         finally {
-            Remove-Variable -Name AppName -Scope Global -ErrorAction SilentlyContinue
-            Remove-Variable -Name AppID -Scope Global -ErrorAction SilentlyContinue
-            Remove-Variable -Name AppVersion -Scope Global -ErrorAction SilentlyContinue
-            Remove-Variable -Name AppInfo -Scope Global -ErrorAction SilentlyContinue
+            Clear-GlobalAppVariables
         }
         return  
     }
@@ -464,56 +485,29 @@ function InstallChoice {
     else {
         Write-Host "$Global:AppInfo was not installed." -ForegroundColor Red
     }
-    Remove-Variable -Name AppName -Scope Global -ErrorAction SilentlyContinue
-    Remove-Variable -Name AppID -Scope Global -ErrorAction SilentlyContinue
-    Remove-Variable -Name AppVersion -Scope Global -ErrorAction SilentlyContinue
-    Remove-Variable -Name AppInfo -Scope Global -ErrorAction SilentlyContinue
+    Clear-GlobalAppVariables
     return
 }
 ## Winget Uninstall with FZF ##
 function winun {
     Write-Host "Select a Package to Uninstall:" -ForegroundColor Yellow
-
-    # Capture selected package output from fzf
-    $PackID = winget list | fzf
-
-    # Apply replacements to correct encoding issues
-    $PackID = $PackID -replace '┬«', '®' -replace 'ΓÇô', '-' -replace 'ΓÇª', ' '
-
-    # Display the selected package after replacements for debugging
-    Write-Host "Selected Package Raw Output (Post-Replacements):" -ForegroundColor Blue
-    Write-Host $PackID.Trim() 
-
-    # Use regex to capture Name, ID, and Version
-    if ($PackID -match '^(.*?)\s{2,}([^\s]+)\s{2,}(.+?)(?=\s{2,}|$)') {
-                        
-        $Global:AppName = $matches[1].Trim()
-        $Global:AppID = $matches[2].Trim()
-        $Global:AppVersion = $matches[3].Trim()
-
-        # Construct the AppInfo output
-        $Global:AppInfo = "$Global:AppName (ID: $Global:AppID, Version: $Global:AppVersion)"
-        Write-Host "You Selected: $Global:AppInfo" -ForegroundColor DarkYellow
-        winuncheck
-    } else {
+    $PackID = Get-WinGetPackage
+    if (-not $PackID) {
         Write-Host "No valid package selected." -ForegroundColor DarkRed
-        Remove-Variable -Name AppName -Scope Global -ErrorAction SilentlyContinue
-        Remove-Variable -Name AppID -Scope Global -ErrorAction SilentlyContinue
-        Remove-Variable -Name AppVersion -Scope Global -ErrorAction SilentlyContinue
-        Remove-Variable -Name AppInfo -Scope Global -ErrorAction SilentlyContinue
         return
+    }
+    else {
+        winselect $PackID
+        winuncheck
     }
 }
 
 function winuncheck {
     Write-Host "Uninstall [y] or [n]?" -ForegroundColor DarkRed
     $YorN = Read-Host
-
     if ($YorN -match '^[Yy]$') {
-
-            $command = "winget uninstall  --id $Global:AppID"
         try {
-            Invoke-Expression $command
+            winget uninstall  --id $Global:AppID
             Write-Host "$Global:AppInfo uninstalled successfully." -ForegroundColor Green
         }
         catch {
@@ -522,11 +516,11 @@ function winuncheck {
     } else {
         Write-Host "$Global:AppInfo is still installed." -ForegroundColor Blue
     }
-    Remove-Variable -Name AppName -Scope Global -ErrorAction SilentlyContinue
-    Remove-Variable -Name AppID -Scope Global -ErrorAction SilentlyContinue
-    Remove-Variable -Name AppVersion -Scope Global -ErrorAction SilentlyContinue
-    Remove-Variable -Name AppInfo -Scope Global -ErrorAction SilentlyContinue
+    Clear-GlobalAppVariables
     return
+}
+function Clear-GlobalAppVariables {
+    Remove-Variable -Name AppName, AppID, AppVersion, AppInfo -Scope Global -ErrorAction SilentlyContinue
 }
 
 ############# System Information ##################
@@ -780,9 +774,11 @@ Scripts- Changes the current directory to the Scripts folder.
 
 Set-Cert <path> - Sets the certificate on the script at the given path...use 'path_to_script'
 
-winstall <package> - Searh for and install 'Package' with winget on D: Drive
+winin - Searh for and install Package with winget using FZF
 
-vscan - Opens Malwarebytesa and runs a Defender Quick Scan, excludes results for UrBackup
+winun -  Uninstall Package with winget using FZF
+
+vscan - Opens Malwarebytesa and runs a Defender Quick Scan
 
 dvs - Runs Defender Quick Scan
 
