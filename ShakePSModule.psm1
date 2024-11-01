@@ -381,7 +381,7 @@ function winpick {
 
     # Prepare a fixed-width format for fzf
     $formattedAppList = $AppObject | ForEach-Object {
-        '{0,-65} {1,-16} {2}' -f $_.Name, $_.Version, $_.Id
+        '{0,-70} {1,-18} {3}' -f $_.Name, $_.Version, $_.Id
     }
 
     # Select an app via fzf
