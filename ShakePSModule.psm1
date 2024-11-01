@@ -375,8 +375,15 @@ function winselect {
     $selectId = $selectApp | fzf --prompt=" Select a package: "
     if ($selectId) {
         $selectAppId = $selectId -split '  ' | Select-Object -Last 1
+        $selectAppName = $selectId -split '  ' | Select-Object -First 1
         $selectAppId = $selectAppId.TrimStart()        
-        $selectApp = $AppObject | Where-Object { $_.Id -like $selectAppId }
+        $selectAppName
+        $selectAppId        
+        $selectApp = $AppObject | 
+            Where-Object { 
+                ( $_.Name -eq $selectedAppName ) -or 
+                ( $_.Id -eq $selectAppId ) 
+            }
         $selectApp | ForEach-Object {
             $Global:AppName = $($_.Name) 
             $Global:AppVersion = $($_.Version) 
