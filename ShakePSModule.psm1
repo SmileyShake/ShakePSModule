@@ -496,13 +496,12 @@ function winun {
         Write-Host "No valid package selected." -ForegroundColor DarkRed
         return
     }
-    else {
-        winselect $PackID
-        winuncheck
+    winselect $PackID
+    if  (-not $Global:AppName) {
+        Write-Host "No Package Selected." -ForegroundColor Red
+        Clear-GlobalAppVariables
+        return
     }
-}
-
-function winuncheck {
     Write-Host "Uninstall [y] or [n]?" -ForegroundColor DarkRed
     $YorN = Read-Host
     if ($YorN -match '^[Yy]$') {
