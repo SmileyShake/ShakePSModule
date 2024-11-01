@@ -383,13 +383,14 @@ function winpick {
         $selectId =  $selectId -replace '┬«', '®' -replace 'ΓÇô', '-' -replace 'ΓÇª', '  '
         $selectAppId = $selectId -split ' ' | Select-Object -Last 1
         $selectAppName = $selectId -split '  ' | Select-Object -First 1
+        $selectAppId = $selectAppId -split ' ' | Select-Object -Last 1
         $selectAppId = $selectAppId.TrimStart()        
         $selectAppName
         $selectAppId        
         $selectApp = $AppObject | 
             Where-Object { 
                 ( $_.Name -eq $selectedAppName ) -or 
-                ( $_.Id -eq $selectAppId ) 
+                ( $_.Id -$selectAppId ) 
             }
         $selectApp | ForEach-Object {
             $Global:AppName = $($_.Name) 
