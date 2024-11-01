@@ -356,47 +356,58 @@ function dvs {
 ###############################################################################
 ## WingetInstall with FZF ##
 function winpick {
-    param ( $WingetCommand
-        )
+    param ( $WingetCommand )
     Clear-GlobalAppVariables
+
+    # Prompt for a package name if $WingetCommand is not provided
     if (-not $WingetCommand) {
         Write-Host "Enter Package To Search For:" -ForegroundColor Blue
         $PackName =  Read-Host
         $WingetCommand = Find-WingetPackage $PackName
     }
-    $AppObject = $WingetCommand | ForEach-Object {
-        [PSCustomObject]@{
-            PSTypeName         = 'App.Object'
-            Name               = $_.Name
-            Version            = $_.Version ?? $_.InstalledVersion 
-            Id                 = $_.Id
-            Source             = $_.Source
-            IsUpdateAvailable  = $_.IsUpdateAvailable
-            AvailableVersions  = ($_.AvailableVersions | Select-Object -First 5) -join ', '
-        }
-    }
-    
 
-    $selectApp = $WingetCommand | Select-Object Name , Version , Id
-    $selectId = $selectApp | fzf --prompt=" Select a package: "
+    # Create a custom object list using Add-Member
+    $AppObject = $WingetCommand | ForEach-Object {
+        $app = New-Object PSObject
+        $app | Add-Member -MemberType NoteProperty -Name 'PSTypeName'        -Value 'App.Object'
+        $app | Add-Member -MemberType NoteProperty -Name 'Name'              -Value $_.Name
+        $app | Add-Member -MemberType NoteProperty -Name 'Version'           -Value ($_.Version ?? $_.InstalledVersion)
+        $app | Add-Member -MemberType NoteProperty -Name 'Id'                -Value $_.Id
+        $app | Add-Member -MemberType NoteProperty -Name 'Source'            -Value $_.Source
+        $app | Add-Member -MemberType NoteProperty -Name 'IsUpdateAvailable' -Value $_.IsUpdateAvailable
+        $app | Add-Member -MemberType NoteProperty -Name 'AvailableVersions' -Value (($_.AvailableVersions | Select-Object -First 5) -join ', ')
+        $app
+    }
+
+    # Prepare a fixed-width format for fzf
+    $formattedAppList = $AppObject | ForEach-Object {
+        '{0,-57} {1,-15} {2}' -f $_.Name, $_.Version, $_.Id
+    }
+
+    # Select an app via fzf
+    $selectId = $formattedAppList | fzf --prompt=" Select a package: "
+
     if ($selectId) {
-        $selectId =  $selectId -replace '┬«', '®' -replace 'ΓÇô', '-' -replace 'ΓÇª', ' '
-        $selectAppId = $selectId -split '  ' | Select-Object -Last 1
-        $selectAppName = $selectId -split '  ' | Select-Object -First 1
-        $selectAppId = $selectAppId.TrimStart()        
-        $selectAppName
-        $selectAppId        
-        $selectApp = $AppObject | 
-            Where-Object { 
-                ( $_.Name -eq $selectedAppName ) -or 
-                ( $_.Id -eq $selectAppId ) 
-            }
+        # Parsing selection
+        $selectId = $selectId -replace '┬«', '®' -replace 'ΓÇô', '-' -replace 'ΓÇª', ' '
+        $selectAppName = $selectId.Substring(0, 57).Trim()
+        $selectAppId = $selectId.Substring(72).Trim()
+
+        # Filter selected AppObject
+        $selectApp = $AppObject | Where-Object { 
+            ($_.Name -eq $selectAppName) -or 
+            ($_.Id -eq $selectAppId) 
+        }
+
+        # Set global variables with selected app information
         $selectApp | ForEach-Object {
-            $Global:AppName = $($_.Name) 
-            $Global:AppVersion = $($_.Version) 
-            $Global:AppId = $($_.Id)
+            $Global:AppName = $_.Name 
+            $Global:AppVersion = $_.Version 
+            $Global:AppId = $_.Id
             $Global:AppInfo = "$Global:AppName  (Id: $Global:AppId | Version: $Global:AppVersion)"
-            }
+        }
+        
+        # Display selected app details
         Write-Host "You selected:" -ForegroundColor Blue
         $Global:FullAppInfo = $selectApp | Format-List   
         Write-Host "$Global:AppInfo" -ForegroundColor DarkGreen
@@ -404,6 +415,7 @@ function winpick {
     }
     return
 }
+
 function winin {
     Write-Host "Enter Program to Install:" -ForegroundColor Cyan
     $PackName = Read-Host
