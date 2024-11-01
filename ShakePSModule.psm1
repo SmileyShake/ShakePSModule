@@ -388,8 +388,8 @@ function winpick {
         $selectAppId        
         $selectApp = $AppObject | 
             Where-Object { 
-                ( $_.Name -eq $selectedAppName ) -or 
-                ( $_.Id -eq $selectAppId ) 
+                ( $_.Name -like $selectedAppName ) -or 
+                ( $_.Id -like $selectAppId ) 
             }
         $selectApp | ForEach-Object {
             $Global:AppName = $($_.Name) 
