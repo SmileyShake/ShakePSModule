@@ -355,9 +355,14 @@ function dvs {
 # Winget with FZF search and select
 ###############################################################################
 ## WingetInstall with FZF ##
-function winselect {
+function winpick {
     param ( $WingetCommand
         )
+    if (-not $WingetCommand) {
+        Write-Host "Enter Package To Search For:" -ForegroundColor Blue
+        $PackName =  Read-Host
+        $WingetCommand = Find-WingetPackage $PackName
+    }
     $AppObject = $WingetCommand | ForEach-Object {
         [PSCustomObject]@{
             PSTypeName         = 'App.Object'
@@ -390,9 +395,9 @@ function winselect {
             $Global:AppId = $($_.Id)
             $Global:AppInfo = "$Global:AppName  (Id: $Global:AppId | Version: $Global:AppVersion)"
             }
-        Write-Host "You selected:"
+        Write-Host "You selected:" -ForegroundColor Blue
         $Global:FullAppInfo = $selectApp | Format-List   
-        Write-Host "$Global:AppInfo" -ForegroundColor DarkYellow
+        Write-Host "$Global:AppInfo" -ForegroundColor DarkGreen
         $Global:FullAppInfo
     }
     return
@@ -405,7 +410,7 @@ function winin {
         Write-Host "No Packages found." -ForegroundColor Red
         return
     }
-    winselect $PackID
+    winpick $PackID
     if  (-not $Global:AppName) {
         Write-Host "No Package Selected." -ForegroundColor Red
         Clear-GlobalAppVariables
@@ -496,7 +501,7 @@ function winun {
         Write-Host "No valid package selected." -ForegroundColor DarkRed
         return
     }
-    winselect $PackID
+    winpick $PackID
     if  (-not $Global:AppName) {
         Write-Host "No Package Selected." -ForegroundColor Red
         Clear-GlobalAppVariables
