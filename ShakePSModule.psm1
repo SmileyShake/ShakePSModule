@@ -229,8 +229,8 @@ function junk {
 ## Update PowerShell, Winget, Programs and Windows ##
 function ud {
     psup
-    wgetup
     winup
+    windowup
 }
 function psup {
     try {
@@ -254,7 +254,7 @@ function psup {
         Write-Error "Failed to update PowerShell. Error: $_" -ForegroundColor DarkRed
     }
 }
-function wgetup {
+function winup {
     if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
         Write-Host "Winget is not installed. Installing Winget now..." -ForegroundColor Blue
         $installerUrl = "https://aka.ms/getwinget"
@@ -304,7 +304,7 @@ function wgetup {
         }
     }
 }
-function winup {
+function windowup {
     if (-not (Get-Module -ListAvailable -Name PSWindowsUpdate)) {
         Write-Host "PSWindowsUpdate module not found. Installing..." -ForegroundColor Green
         Install-Module -Name PSWindowsUpdate -Force -Scope CurrentUser -AllowClobber
@@ -741,10 +741,6 @@ function Show-Help { @"
 PowerShell Profile Help
 =======================
 
-Update-PowerShell - Checks for the latest PowerShell release and updates if a new version is available.
-
-ud - Checks winget and windows for updates and installs any updates found.
-
 touch <file> - Creates a new empty file.
 
 ff <name> - Finds files recursively with the specified name.
@@ -786,6 +782,16 @@ mkcd <dir> - Creates and changes to a new directory.
 Scripts- Changes the current directory to the Scripts folder.
 
 Set-Cert <path> - Sets the certificate on the script at the given path...use 'path_to_script'
+
+ud - Checks PowerShell, winget and windows for updates and installs any updates found.
+
+psup - Checks PowerShell for updates and installs any updates found.
+
+winup - Checks Winget and Packages for updates and installs any updates found.
+
+windowup - Checks Windows for updates and installs any updates found.
+
+winpick - Search for Package with winget using FZF
 
 winin - Searh for and install Package with winget using FZF
 
