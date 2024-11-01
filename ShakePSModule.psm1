@@ -381,15 +381,15 @@ function winpick {
     $selectId = $selectApp | fzf --prompt=" Select a package: "
     if ($selectId) {
         $selectId =  $selectId -replace '┬«', '®' -replace 'ΓÇô', '-' -replace 'ΓÇª', '  '
-        $selectAppId = $selectId -split '  ' | Select-Object -Last 1
+        $selectAppId = $selectId -split ' ' | Select-Object -Last 1
         $selectAppName = $selectId -split '  ' | Select-Object -First 1
         $selectAppId = $selectAppId.TrimStart()        
         $selectAppName
         $selectAppId        
         $selectApp = $AppObject | 
             Where-Object { 
-                ( $_.Name -like $selectedAppName ) -or 
-                ( $_.Id -like $selectAppId ) 
+                ( $_.Name -eq $selectedAppName ) -or 
+                ( $_.Id -eq $selectAppId ) 
             }
         $selectApp | ForEach-Object {
             $Global:AppName = $($_.Name) 
