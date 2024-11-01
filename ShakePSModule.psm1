@@ -371,18 +371,13 @@ function winselect {
     }
 
     $formattedPackages = $packages | ForEach-Object {
-        if ($_.Version){
-            "$($_.Name)`t`t-- $($_.Version)`t`t-- $($_.Id)"
+            "$($_.Id)`t-- $($_.Name)`t-- $($_.Source)`t-- $($_.Version ?? $_.InstalledVersion)"
         }
-        if ($_.InstalledVersion) {
-        "$($_.Name)`t`t-- $($_.InstalledVersion)`t`t-- $($_.Id)"
-        }
-    }
 
-    $selectedApp = $formattedPackages | fzf --prompt="Select a package: "
+    $selectedApp = $formattedPackages | fzf --prompt=" Select a package: "
     
     if ($selectedApp) {
-        $selectedId = $selectedApp -split "`t`t-- " | Select-Object -Last 1
+        $selectedId = $selectedApp -split "`t-- " | Select-Object -First 1   
         $selectedApp = $packages | Where-Object { $_.Id -eq $selectedId }
     
         $selectedApp | ForEach-Object {
@@ -506,13 +501,19 @@ function winun {
     $YorN = Read-Host
     if ($YorN -match '^[Yy]$') {
         try {
-            winget uninstall  --id $Global:AppID
-            Write-Host "$Global:AppInfo uninstalled successfully." -ForegroundColor Green
+            if ($Global:FullAppInfo -match '*ARP/*' -or  $Global:FullAppInfo -match '*MSIX/*') {
+                winget uninstall  --id $Global:AppID --source msstore --silent
+                Write-Host "$Global:AppInfo uninstalled successfully." -ForegroundColor Green
+            }
+            else {
+                winget uninstall --id $Global:AppID --silent
+            }
         }
         catch {
             Write-Host "Unable to Uninstall $Global:AppInfo." -ForegroundColor DarkRed
         }
-    } else {
+    }
+    else {
         Write-Host "$Global:AppInfo is still installed." -ForegroundColor Blue
     }
     Clear-GlobalAppVariables
