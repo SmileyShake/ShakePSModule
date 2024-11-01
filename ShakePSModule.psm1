@@ -372,18 +372,19 @@ function winpick {
             Id                 = $_.Id
             Source             = $_.Source
             IsUpdateAvailable  = $_.IsUpdateAvailable
-            spacer             = '  '
+            spacerFirst        = '--'
+            spacerLast         = '--'
             AvailableVersions  = ($_.AvailableVersions | Select-Object -First 5) -join ', '
         }
     }
     
 
-    $selectApp = $WingetCommand | Select-Object Name, spacer, Version, Source, spacer, Id
+    $selectApp = $WingetCommand | Select-Object Name, spacerFirst, Version, Source, spacerLast, Id
     $selectId = $selectApp | fzf --prompt=" Select a package: "
     if ($selectId) {
         $selectId =  $selectId -replace '┬«', '®' -replace 'ΓÇô', '-' -replace 'ΓÇª', ' '
-        $selectAppId = $selectId -split '  ' | Select-Object -Last 1
-        $selectAppName = $selectId -split '  ' | Select-Object -First 1
+        $selectAppId = $selectId -split '--' | Select-Object -Last 1
+        $selectAppName = $selectId -split '--' | Select-Object -First 1
         $selectAppId = $selectAppId.TrimStart()        
         $selectAppName
         $selectAppId        
