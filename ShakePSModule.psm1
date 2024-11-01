@@ -380,7 +380,7 @@ function winpick {
     
 
     $selectApp = $WingetCommand | Select-Object Name, spacerFirst, Version, Source, spacerLast, Id
-    $selectId = $selectApp | fzf --prompt=" Select a package: "
+    $selectId = $selectApp | Format-Table | fzf --prompt=" Select a package: "
     if ($selectId) {
         $selectId =  $selectId -replace '┬«', '®' -replace 'ΓÇô', '-' -replace 'ΓÇª', ' '
         $selectAppId = $selectId -split '--' | Select-Object -Last 1
