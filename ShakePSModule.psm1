@@ -372,12 +372,13 @@ function winpick {
             Id                 = $_.Id
             Source             = $_.Source
             IsUpdateAvailable  = $_.IsUpdateAvailable
+            spacer             = '  '
             AvailableVersions  = ($_.AvailableVersions | Select-Object -First 5) -join ', '
         }
     }
     
 
-    $selectApp = $WingetCommand | Select-Object Name, Version, Source, Id
+    $selectApp = $WingetCommand | Select-Object Name, spacer, Version, Source, spacer, Id
     $selectId = $selectApp | fzf --prompt=" Select a package: "
     if ($selectId) {
         $selectId =  $selectId -replace '┬«', '®' -replace 'ΓÇô', '-' -replace 'ΓÇª', ' '
