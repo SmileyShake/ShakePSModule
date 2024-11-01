@@ -358,37 +358,35 @@ function dvs {
 function winselect {
     param ( $WingetCommand
         )
-    $packages = $WingetCommand | ForEach-Object {
+    $AppObject = $WingetCommand | ForEach-Object {
         [PSCustomObject]@{
+            PSTypeName         = 'App.Object'
             Name               = $_.Name
+            Version            = $_.Version ?? $_.InstalledVersion 
             Id                 = $_.Id
-            Version            = $_.Version
-            InstalledVersion   = $_.InstalledVersion 
-            IsUpdateAvailable  = $_.IsUpdateAvailable
             Source             = $_.Source
+            IsUpdateAvailable  = $_.IsUpdateAvailable
             AvailableVersions  = ($_.AvailableVersions | Select-Object -First 5) -join ', '
         }
     }
-
-    $formattedPackages = $packages | ForEach-Object {
-            "$($_.Id)`t-- $($_.Name)`t-- $($_.Source)`t-- $($_.Version ?? $_.InstalledVersion)"
-        }
-
-    $selectedApp = $formattedPackages | fzf --prompt=" Select a package: "
     
-    if ($selectedApp) {
-        $selectedId = $selectedApp -split "`t-- " | Select-Object -First 1   
-        $selectedApp = $packages | Where-Object { $_.Id -eq $selectedId }
-    
-        $selectedApp | ForEach-Object {
+
+    $selectApp = $WingetCommand | Select-Object Name, Version, Id
+    $selectId = $selectApp | fzf --prompt=" Select a package: "
+    if ($selectId) {
+        $selectAppId = $selectId -split '  ' | Select-Object -Last 1
+        $selectAppId = $selectAppId.TrimStart()        
+        $selectApp = $AppObject | Where-Object { $_.Id -like $selectAppId }
+        $selectApp | ForEach-Object {
             $Global:AppName = $($_.Name) 
-            $Global:AppVersion = $($_.InstalledVersion ?? $_.Version) 
+            $Global:AppVersion = $($_.Version) 
             $Global:AppId = $($_.Id)
             $Global:AppInfo = "$Global:AppName  (Id: $Global:AppId | Version: $Global:AppVersion)"
-        }
-    Write-Output "You selected:"
-    $Global:FullAppInfo = $selectedApp | Format-List   
-    Write-Output $Global:FullAppInfo
+            }
+        Write-Host "You selected:"
+        $Global:FullAppInfo = $selectApp | Format-List   
+        Write-Host "$Global:AppInfo" -ForegroundColor DarkYellow
+        $Global:FullAppInfo
     }
     return
 }
