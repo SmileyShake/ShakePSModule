@@ -501,16 +501,19 @@ function winun {
     $YorN = Read-Host
     if ($YorN -match '^[Yy]$') {
         try {
-            if ($Global:FullAppInfo -match '*ARP/*' -or  $Global:FullAppInfo -match '*MSIX/*') {
+            if ($Global:AppId -like 'ARP/*' -or  $Global:AppId -like 'MSIX/*') {
                 winget uninstall  --id $Global:AppID --source msstore --silent
                 Write-Host "$Global:AppInfo uninstalled successfully." -ForegroundColor Green
             }
             else {
                 winget uninstall --id $Global:AppID --silent
+                Write-Host "$Global:AppInfo uninstalled successfully." -ForegroundColor Green
             }
         }
         catch {
-            Write-Host "Unable to Uninstall $Global:AppInfo." -ForegroundColor DarkRed
+            Write-Host "Unable to Uninstall: " -ForegroundColor DarkRed
+            Write-Host $Global:FullAppInfo
+            Write-Host "Error: $_" -ForegroundColor DarkRed
         }
     }
     else {
