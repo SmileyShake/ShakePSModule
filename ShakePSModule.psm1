@@ -377,9 +377,10 @@ function winpick {
     }
     
 
-    $selectApp = $WingetCommand | Select-Object Name, Version, Id
+    $selectApp = $WingetCommand | Select-Object Name, Version, Source, Id
     $selectId = $selectApp | fzf --prompt=" Select a package: "
     if ($selectId) {
+        $selectId =  $selectId -replace '┬«', '®' -replace 'ΓÇô', '-' -replace 'ΓÇª', ' '
         $selectAppId = $selectId -split '  ' | Select-Object -Last 1
         $selectAppName = $selectId -split '  ' | Select-Object -First 1
         $selectAppId = $selectAppId.TrimStart()        
