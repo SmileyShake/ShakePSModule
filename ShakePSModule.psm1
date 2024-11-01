@@ -391,7 +391,7 @@ function winpick {
         # Parsing selection
         $selectId = $selectId -replace '┬«', '®' -replace 'ΓÇô', '-' -replace 'ΓÇª', ' '
         $selectAppName = $selectId.Substring(0, 70).Trim()
-        $selectAppId = $selectId.Substring(72).Trim()
+        $selectAppId = $selectId.Substring(90).Trim()
 
         # Filter selected AppObject
         $selectApp = $AppObject | Where-Object { 
