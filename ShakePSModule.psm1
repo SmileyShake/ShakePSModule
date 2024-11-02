@@ -394,7 +394,7 @@ function winpick {
         $selectAppId = $selectId.Substring(90).Trim()
         # Filter selected AppObject
         $selectApp = $AppObject | Where-Object { 
-            ($_.Name -eq $selectAppName) -or 
+            ($_.Name -eq $selectAppName) -and 
             ($_.Id -eq $selectAppId) 
         }
 
