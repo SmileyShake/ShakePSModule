@@ -390,13 +390,11 @@ function winpick {
     if ($selectId) {
         # Parsing selection
         $selectId = $selectId -replace '┬«', '®' -replace 'ΓÇô', '-' -replace 'ΓÇª', ' '
-        $selectAppName = $selectId.Substring(0, 70).Trim()
         $selectAppId = $selectId.Substring(90).Trim()
         # Filter selected AppObject
         $selectApp = $AppObject | Where-Object { 
             ($_.Id -eq $selectAppId) 
         }
-
         # Set global variables with selected app information
         $selectApp | ForEach-Object {
             $Global:AppName = $_.Name 
@@ -753,17 +751,11 @@ function Show-Help { @"
 PowerShell Profile Help
 =======================
 
+Test-CommandExits - Test if "command" exists.
+
 touch <file> - Creates a new empty file.
 
 ff <name> - Finds files recursively with the specified name.
-
-Get-PubIP - Retrieves the public IP address of the machine.
-
-winutil - Runs the WinUtil script from Chris Titus Tech.
-
-uptime - Displays the system uptime.
-
-reloadprofile - Reloads the current user's PowerShell profile.
 
 unzip <file> - Extracts a zip file to the current directory.
 
@@ -791,29 +783,15 @@ nf <name> - Creates a new file with the specified name.
 
 mkcd <dir> - Creates and changes to a new directory.
 
-Scripts- Changes the current directory to the Scripts folder.
-
 Set-Cert <path> - Sets the certificate on the script at the given path...use 'path_to_script'
 
-ud - Checks PowerShell, winget and windows for updates and installs any updates found.
-
-psup - Checks PowerShell for updates and installs any updates found.
-
-winup - Checks Winget and Packages for updates and installs any updates found.
-
-windowup - Checks Windows for updates and installs any updates found.
-
-winpick - Search for Package with winget using FZF
-
-winin - Searh for and install Package with winget using FZF
-
-winun -  Uninstall Package with winget using FZF
-
-vscan - Opens Malwarebytesa and runs a Defender Quick Scan
-
-dvs - Runs Defender Quick Scan
-
 home - Changes the current directory to $HOME.
+
+Scripts- Changes the current directory to the Scripts folder.
+
+c - Sets the current directory to C:\
+
+d - Sets the current directory to D:\
 
 dl- Changes the current directory to the Downloads folder.
 
@@ -821,17 +799,11 @@ docs - Changes the current directory to the Documents folder.
 
 dtop - Changes the current directory to the Desktop folder.
 
-junk - Deletes Temporary Files
-
-rmbb - Starts BleachBit and RAMMap.
-
-bench - Starts Cinbench and monitors.
-
 ep - Opens the profile for editing with VSCode.
 
 epv - Opens the profile for editing with NeoVim.
 
-Get-PoshThemes - List of available Oh My Posh! themes.
+reloadprofile - Reloads the current user's PowerShell profile.
 
 la - Lists all files in the current directory with detailed formatting.
 
@@ -847,23 +819,70 @@ gp - Shortcut for 'git push'.
 
 g - Changes to the GitHub directory.
 
+gcl - Changes to the GitHub Clone directory.
+
 gcom <message> - Adds all changes and commits with the specified message.
 
 lazyg <message> - Adds all changes, commits with the specified message, and pushes to the remote repository.
 
+winutil - Runs the WinUtil script from Chris Titus Tech.
+
+junk - Deletes Temporary Files
+
+ud - Checks PowerShell, winget and windows for updates and installs any updates found.
+
+psup - Checks PowerShell for updates and installs any updates found.
+
+winup - Checks Winget and Packages for updates and installs any updates found.
+
+windowup - Checks Windows for updates and installs any updates found.
+
+vscan - Opens Malwarebytesa and runs a Defender Quick Scan
+
+dvs - Runs Defender Quick Scan
+
+winpick - Search for Package with winget using FZF
+
+winin - Searh for and install Package with winget using FZF
+
+winun -  Uninstall Package with winget using FZF
+
 sysinfo - Displays detailed system information.
+
+uptime - Displays the system uptime.
+
+Get-PubIP - Retrieves the public IP address of the machine.
 
 flushdns - Clears the DNS cache.
 
+showdns - Shows the current DNS cache.
+
 ReNet - Resets Network, requires restart to take effect.
+
+teleoptout - Opt out of PowerShell Telemetry, must be Admin.
+
+rehis <String> - Removes command from PSReadLine and PS History
 
 cpy <text> - Copies the specified text to the clipboard.
 
 pst - Retrieves text from the clipboard.
 
-rehis <String> - Removes command from PSReadLine and PS History
+ZoxSetUp - Sets up Zoxide.
 
-teleoptout - Opt out of PowerShell Telemetry, must be Admin.
+ModInstall - Downloads and Installs required Modules.
+
+PSRLsetup - Sets up PSReadLine.
+
+AliasSetup - Sets Aliases.
+
+PSInit - Runs: ZoxSetUp, ModInstall, PSRLsetup and AliasSetup.
+
+Get-PoshThemes - List of available Oh My Posh! themes.
+
+rmbb - Starts BleachBit and RAMMap.
+
+bench - Starts Cinbench and monitors.
+
 
 Use 'Show-Help' to display this help message.
 "@
