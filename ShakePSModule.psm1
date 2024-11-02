@@ -394,8 +394,7 @@ function winpick {
         $selectAppId = $selectId.Substring(90).Trim()
         # Filter selected AppObject
         $selectApp = $AppObject | Where-Object { 
-            ($_.Id -eq $selectAppId) -and 
-            ($_.Name -eq $selectAppName) 
+            ($_.Id -eq $selectAppId) 
         }
 
         # Set global variables with selected app information
