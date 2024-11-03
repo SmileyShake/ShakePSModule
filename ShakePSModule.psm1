@@ -673,7 +673,6 @@ function ModInstall {
         "PSReadLine"
         "PSFzf"
         "Microsoft.Winget.Client"
-        "CompletionPredictor"
     )
     foreach ($mod in $modName) {
     if (-not (Get-Module -ListAvailable -Name $mod)) {
