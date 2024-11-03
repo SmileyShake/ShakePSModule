@@ -371,7 +371,7 @@ function winpick {
         $app = New-Object PSObject
         $app | Add-Member -MemberType NoteProperty -Name 'PSTypeName'        -Value 'App.Object'
         $app | Add-Member -MemberType NoteProperty -Name 'Name'              -Value $_.Name
-        $app | Add-Member -MemberType NoteProperty -Name 'Version'           -Value ($_.Version ?? $_.InstalledVersion)
+        $app | Add-Member -MemberType NoteProperty -Name 'Version'           -Value ($null -ne $_.Version ? $_.Version : $_.InstalledVersion)
         $app | Add-Member -MemberType NoteProperty -Name 'Id'                -Value $_.Id
         $app | Add-Member -MemberType NoteProperty -Name 'Source'            -Value $_.Source
         $app | Add-Member -MemberType NoteProperty -Name 'IsUpdateAvailable' -Value $_.IsUpdateAvailable
