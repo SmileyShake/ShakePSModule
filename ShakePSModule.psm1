@@ -375,11 +375,11 @@ function winpick {
         $app | Add-Member -MemberType NoteProperty -Name 'Source'            -Value $_.Source
         $app | Add-Member -MemberType NoteProperty -Name 'IsUpdateAvailable' -Value $_.IsUpdateAvailable
         $app | Add-Member -MemberType NoteProperty -Name 'AvailableVersions' -Value (($_.AvailableVersions | Select-Object -First 5) -join ', ')
-        if ($.Version){
-            $app | Add-Member -MemberType NoteProperty -Name 'Version'           -Value $_.Version 
+        if ($_.Version) {
+            $app | Add-Member -MemberType NoteProperty -Name 'Version'       -Value $_.Version 
         }
-        elseif ($.InstalledVersion) {
-            $app | Add-Member -MemberType NoteProperty -Name 'Version'           -Value $_.InstalledVersion
+        elseif ($_.InstalledVersion) {
+            $app | Add-Member -MemberType NoteProperty -Name 'Version'       -Value $_.InstalledVersion
         }
         $app
     }
