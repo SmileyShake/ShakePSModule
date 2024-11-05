@@ -248,6 +248,7 @@ function psup {
             winget upgrade "Microsoft.PowerShell" --accept-source-agreements --accept-package-agreements
             Write-Host "PowerShell has been updated. Please restart your shell to reflect changes" -ForegroundColor Magenta
         } else {
+            Write-Host "Current PowerShell Version:  $currentVersion" -ForegroundColor Yellow
             Write-Host "PowerShell is up to date." -ForegroundColor Green
         }
     } catch {
@@ -518,7 +519,7 @@ function winun {
     }
     winpick $PackID
     if  (-not $Global:AppName) {
-        Write-Host "No Package Selected." -ForegroundColor Red
+        Write-Host "No Package Selected." -ForegroundColor DarkRed
         Clear-GlobalAppVariables
         return
     }
