@@ -105,7 +105,7 @@ function scripts {
         Set-Location -Path D:\Documents\PowerShell\Scripts
     }    
     else {    
-        Set-Location -Path $HOME\Documents\WindowsPowerShell\Scripts 
+        Set-Location -Path $HOME\Documents\PowerShell\Scripts 
     }
 }
 function c { Set-Location -Path C:\ }
