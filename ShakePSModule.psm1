@@ -357,9 +357,10 @@ function dvs {
 ###############################################################################
 ## WingetInstall with FZF ##
 function winpick {
-    param ($WingetCommand)
+    param (
+        [string]$WingetCommand
+    )
     Clear-GlobalAppVariables
-
     # Prompt for a package name if $WingetCommand is not provided
     if (-not $WingetCommand) {
         Write-Host "Enter Package To Search For:" -ForegroundColor Blue
@@ -419,7 +420,9 @@ function winpick {
 }
 
 function winin {
-    param ($PackName)
+    param (
+        [string]$PackName
+    )
     if (-not $PackName) {
     Write-Host "Enter Program to Install:" -ForegroundColor Cyan
     $PackName = Read-Host
