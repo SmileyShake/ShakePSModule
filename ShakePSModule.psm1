@@ -469,9 +469,9 @@ function StandardInstall {
     }
     return
 }
-## InstallOptionion to install on D-Drive ##
+## Option to install on D-Drive ##
 function InstallChoice {
-    Write-Host "Please choose an InstallOptionion for $Global:AppInfo :" -ForegroundColor DarkYellow
+    Write-Host "Please choose an Option for $Global:AppInfo :" -ForegroundColor DarkYellow
     Write-Host "  1. Standard winget installation." -ForegroundColor Cyan
     Write-Host "  2. Create new folder "$Global:AppName" in 'D:\Program Files'" -ForegroundColor Cyan
     Write-Host "     --This may revert to the standard installation--" -ForegroundColor Red
@@ -611,7 +611,7 @@ function Remove-PSReadlineHistory {
         [string]$Pattern
     )
 
-    $historyPath = (Get-PSReadLineInstallOptionion).HistorySavePath
+    $historyPath = (Get-PSReadLineOption).HistorySavePath
     $historyLines = [System.IO.File]::ReadAllLines($historyPath)
     $filteredLines = $historyLines | Where-Object { $_ -notmatch $Pattern }
     [System.IO.File]::WriteAllLines($historyPath, $filteredLines)
@@ -693,7 +693,7 @@ function ModInstall {
 }
 ## PS ReadLine Setup ##
 function PSRLsetup {
-    Set-PSReadLineInstallOptionion -Colors @{
+    Set-PSReadLineOption -Colors @{
         Emphasis = 'Green'
         Command = 'DarkYellow'
         Parameter = 'Magenta'
@@ -708,7 +708,7 @@ function PSRLsetup {
         Selection = 'White'
     }
     if ($PSVersionTable.PSVersion.Major -eq 7 ) {
-        Set-PSReadLineInstallOptionion -Colors @{
+        Set-PSReadLineOption -Colors @{
             ListPrediction = 'DarkGreen'
             Selection = "$($PSStyle.Background.Blue)$($PSStyle.Foreground.White)"
             InlinePrediction = $PSStyle.Foreground.BrightYellow + $PSStyle.Background.BrightBlack
@@ -716,16 +716,16 @@ function PSRLsetup {
         if (-not (Get-Module -ListAvailable -Name CompletionPredictor)) {
             Install-Module -Name CompletionPredictor -Scope CurrentUser -Force -SkipPublisherCheck
         }
-        Set-PSReadLineInstallOptionion -PredictionSource HistoryAndPlugin
-        Set-PSReadLineInstallOptionion -PredictionViewStyle ListView        
+        Set-PSReadLineOption -PredictionSource HistoryAndPlugin
+        Set-PSReadLineOption -PredictionViewStyle ListView        
     }
     
     Set-PSReadLineKeyHandler -Chord 'Enter' -Function ValidateAndAcceptLine
-    Set-PSReadLineInstallOptionion -EditMode Windows
-    Set-PSReadLineInstallOptionion -BellStyle None
-    Set-PSReadLineInstallOptionion -HistorySearchCursorMovesToEnd:$True
+    Set-PSReadLineOption -EditMode Windows
+    Set-PSReadLineOption -BellStyle None
+    Set-PSReadLineOption -HistorySearchCursorMovesToEnd:$True
     Set-PSReadLineKeyHandler -Key Tab -ScriptBlock { Invoke-FzfTabCompletion }
-    Set-PsFzfInstallOptionion -PSReadlineChordProvider 'Ctrl+t' -PSReadlineChordReverseHistory 'Ctrl+r'
+    Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' -PSReadlineChordReverseHistory 'Ctrl+r'
     #####
     Register-ArgumentCompleter -Native -CommandName '*' -ScriptBlock {
         param($commandName, $wordToComplete, $cursorPosition)
@@ -735,14 +735,14 @@ function PSRLsetup {
 ## Set Aliases ##
 function AliasSetup {
     #Set aliases for NeoVim
-    Set-Alias -Name vi -Value nvim -InstallOptionion AllScope -Scope Global -Force
-    Set-Alias -Name vim -Value nvim -InstallOptionion AllScope -Scope Global -Force
+    Set-Alias -Name vi -Value nvim -Option AllScope -Scope Global -Force
+    Set-Alias -Name vim -Value nvim -Option AllScope -Scope Global -Force
     # Set UNIX-like aliases for the admin command, so sudo <command> will run the command with elevated rights.
-    Set-Alias -Name su -Value admin -InstallOptionion AllScope -Scope Global -Force
+    Set-Alias -Name su -Value admin -Option AllScope -Scope Global -Force
     # Set aliases for Zoxide
-    Set-Alias -Name z -Value __zoxide_z -InstallOptionion AllScope -Scope Global -Force
-    Set-Alias -Name zi -Value __zoxide_zi -InstallOptionion AllScope -Scope Global -Force
-    Set-Alias -Name cd -Value z -InstallOptionion AllScope -Scope Global -Force
+    Set-Alias -Name z -Value __zoxide_z -Option AllScope -Scope Global -Force
+    Set-Alias -Name zi -Value __zoxide_zi -Option AllScope -Scope Global -Force
+    Set-Alias -Name cd -Value z -Option AllScope -Scope Global -Force
 }
 ## Calls Initialization functions ##
 function PSInit {
