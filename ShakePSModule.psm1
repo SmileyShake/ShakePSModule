@@ -419,8 +419,11 @@ function winpick {
 }
 
 function winin {
+    param ($PackName)
+    if (-not $PackName) {
     Write-Host "Enter Program to Install:" -ForegroundColor Cyan
     $PackName = Read-Host
+    }
     $PackId = Find-WinGetPackage $PackName 
     if (-not $PackId) {
         Write-Host "No Packages found." -ForegroundColor Red
@@ -472,10 +475,9 @@ function StandardInstall {
 ## Option to install on D-Drive ##
 function InstallChoice {
     Write-Host "Please choose an Option for $Global:AppInfo :" -ForegroundColor DarkYellow
-    Write-Host "  1. Standard winget installation." -ForegroundColor Cyan
+    Write-Host "  1. Standard winget installation." -ForegroundColor Green
     Write-Host "  2. Create new folder "$Global:AppName" in 'D:\Program Files'" -ForegroundColor Cyan
-    Write-Host "     --This may revert to the standard installation--" -ForegroundColor Red
-    Write-Host "  3. Do Not Install $Global:AppName" -ForegroundColor Cyan
+    Write-Host "  3. Do Not Install $Global:AppName" -ForegroundColor Red
     $InstallOption = Read-Host 
     if ($InstallOption -eq '1') {
         StandardInstall
@@ -598,12 +600,7 @@ function ReNet {
     Write-Host "Please remember to restart the computer for changes to take effect." -ForegroundColor Yellow
     }
 }
-function telInstallOptionout {
-    if ([bool]([System.Security.Principal.WindowsIdentity]::GetCurrent()).IsSystem) {
-        [System.Environment]::SetEnvironmentVariable('POWERSHELL_TELEMETRY_InstallOptionOUT', 'true', 
-        [System.EnvironmentVariableTarget]::Machine)
-    }
-}
+
 ## Remove Items from PSReadLine History and PSHistory
 function Remove-PSReadlineHistory {
     param (
@@ -863,8 +860,6 @@ flushdns - Clears the DNS cache.
 showdns - Shows the current DNS cache.
 
 ReNet - Resets Network, requires restart to take effect.
-
-teleInstallOptionout - InstallOption out of PowerShell Telemetry, must be Admin.
 
 rehis <String> - Removes command from PSReadLine and PS History
 
