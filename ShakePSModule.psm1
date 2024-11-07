@@ -357,9 +357,7 @@ function dvs {
 ###############################################################################
 ## WingetInstall with FZF ##
 function winpick {
-    param (
-        [string]$WingetCommand
-    )
+    param ($WingetCommand)
     Clear-GlobalAppVariables
     # Prompt for a package name if $WingetCommand is not provided
     if (-not $WingetCommand) {
