@@ -357,7 +357,7 @@ function dvs {
 ###############################################################################
 ## WingetInstall with FZF ##
 function winpick {
-    param ( $WingetCommand )
+    param ($WingetCommand)
     Clear-GlobalAppVariables
 
     # Prompt for a package name if $WingetCommand is not provided
@@ -421,12 +421,12 @@ function winpick {
 function winin {
     Write-Host "Enter Program to Install:" -ForegroundColor Cyan
     $PackName = Read-Host
-    $PackID = Find-WinGetPackage $PackName 
-    if (-not $PackID) {
+    $PackId = Find-WinGetPackage $PackName 
+    if (-not $PackId) {
         Write-Host "No Packages found." -ForegroundColor Red
         return
     }
-    winpick $PackID
+    winpick $PackId
     if  (-not $Global:AppName) {
         Write-Host "No Package Selected." -ForegroundColor Red
         Clear-GlobalAppVariables
@@ -469,27 +469,27 @@ function StandardInstall {
     }
     return
 }
-## Option to install on D-Drive ##
+## InstallOptionion to install on D-Drive ##
 function InstallChoice {
-    Write-Host "Please choose an option for $Global:AppInfo :" -ForegroundColor DarkYellow
+    Write-Host "Please choose an InstallOptionion for $Global:AppInfo :" -ForegroundColor DarkYellow
     Write-Host "  1. Standard winget installation." -ForegroundColor Cyan
     Write-Host "  2. Create new folder "$Global:AppName" in 'D:\Program Files'" -ForegroundColor Cyan
     Write-Host "     --This may revert to the standard installation--" -ForegroundColor Red
     Write-Host "  3. Do Not Install $Global:AppName" -ForegroundColor Cyan
-    $Opt = Read-Host 
-    if ($Opt -eq '1') {
+    $InstallOption = Read-Host 
+    if ($InstallOption -eq '1') {
         StandardInstall
     }
-    elseif ($Opt -eq '2') {            
+    elseif ($InstallOption -eq '2') {            
         try {
-            $InPath = "D:\Program Files\$Global:AppName"
-            New-Item -ItemType Directory -Path $InPath -Force | Out-Null
-            Write-Host "New folder created: $InPath" -ForegroundColor Blue
-            Write-Host "Opening $InPath check for successful operation." -ForegroundColor Yellow
-            Start-Process explorer.exe -ArgumentList "$InPath"
-            Write-Host "$InPath will remain empty if winget could not set the Destination" -ForegroundColor Red
+            $InstallPath = "D:\Program Files\$Global:AppName"
+            New-Item -ItemType Directory -Path $InstallPath -Force | Out-Null
+            Write-Host "New folder created: $InstallPath" -ForegroundColor Blue
+            Write-Host "Opening $InstallPath check for successful operation." -ForegroundColor Yellow
+            Start-Process explorer.exe -ArgumentList "$InstallPath"
+            Write-Host "$InstallPath will remain empty if winget could not set the Destination" -ForegroundColor Red
             Write-Host "Installing $Global:AppName..." -ForegroundColor Yellow
-            winget install --id $Global:AppId --location $InPath --accept-source-agreements --accept-package-agreements --silent
+            winget install --id $Global:AppId --location $InstallPath --accept-source-agreements --accept-package-agreements --silent
             Write-Host "$Global:AppInfo installed successfully." -ForegroundColor Green             
         }
         catch {
@@ -500,7 +500,7 @@ function InstallChoice {
         }
         return  
     }
-    elseif ($Opt -eq '3') {
+    elseif ($InstallOption -eq '3') {
         Write-Host "$Global:AppInfo was not installed." -ForegroundColor Red
     }
     else {
@@ -512,12 +512,12 @@ function InstallChoice {
 ## Winget Uninstall with FZF ##
 function winun {
     Write-Host "Select a Package to Uninstall:" -ForegroundColor Yellow
-    $PackID = Get-WinGetPackage
-    if (-not $PackID) {
+    $PackId = Get-WinGetPackage
+    if (-not $PackId) {
         Write-Host "No valid package selected." -ForegroundColor DarkRed
         return
     }
-    winpick $PackID
+    winpick $PackId
     if  (-not $Global:AppName) {
         Write-Host "No Package Selected." -ForegroundColor DarkRed
         Clear-GlobalAppVariables
@@ -598,9 +598,9 @@ function ReNet {
     Write-Host "Please remember to restart the computer for changes to take effect." -ForegroundColor Yellow
     }
 }
-function teloptout {
+function telInstallOptionout {
     if ([bool]([System.Security.Principal.WindowsIdentity]::GetCurrent()).IsSystem) {
-        [System.Environment]::SetEnvironmentVariable('POWERSHELL_TELEMETRY_OPTOUT', 'true', 
+        [System.Environment]::SetEnvironmentVariable('POWERSHELL_TELEMETRY_InstallOptionOUT', 'true', 
         [System.EnvironmentVariableTarget]::Machine)
     }
 }
@@ -611,7 +611,7 @@ function Remove-PSReadlineHistory {
         [string]$Pattern
     )
 
-    $historyPath = (Get-PSReadLineOption).HistorySavePath
+    $historyPath = (Get-PSReadLineInstallOptionion).HistorySavePath
     $historyLines = [System.IO.File]::ReadAllLines($historyPath)
     $filteredLines = $historyLines | Where-Object { $_ -notmatch $Pattern }
     [System.IO.File]::WriteAllLines($historyPath, $filteredLines)
@@ -693,7 +693,7 @@ function ModInstall {
 }
 ## PS ReadLine Setup ##
 function PSRLsetup {
-    Set-PSReadLineOption -Colors @{
+    Set-PSReadLineInstallOptionion -Colors @{
         Emphasis = 'Green'
         Command = 'DarkYellow'
         Parameter = 'Magenta'
@@ -708,7 +708,7 @@ function PSRLsetup {
         Selection = 'White'
     }
     if ($PSVersionTable.PSVersion.Major -eq 7 ) {
-        Set-PSReadLineOption -Colors @{
+        Set-PSReadLineInstallOptionion -Colors @{
             ListPrediction = 'DarkGreen'
             Selection = "$($PSStyle.Background.Blue)$($PSStyle.Foreground.White)"
             InlinePrediction = $PSStyle.Foreground.BrightYellow + $PSStyle.Background.BrightBlack
@@ -716,16 +716,16 @@ function PSRLsetup {
         if (-not (Get-Module -ListAvailable -Name CompletionPredictor)) {
             Install-Module -Name CompletionPredictor -Scope CurrentUser -Force -SkipPublisherCheck
         }
-        Set-PSReadLineOption -PredictionSource HistoryAndPlugin
-        Set-PSReadLineOption -PredictionViewStyle ListView        
+        Set-PSReadLineInstallOptionion -PredictionSource HistoryAndPlugin
+        Set-PSReadLineInstallOptionion -PredictionViewStyle ListView        
     }
     
     Set-PSReadLineKeyHandler -Chord 'Enter' -Function ValidateAndAcceptLine
-    Set-PSReadLineOption -EditMode Windows
-    Set-PSReadLineOption -BellStyle None
-    Set-PSReadLineOption -HistorySearchCursorMovesToEnd:$True
+    Set-PSReadLineInstallOptionion -EditMode Windows
+    Set-PSReadLineInstallOptionion -BellStyle None
+    Set-PSReadLineInstallOptionion -HistorySearchCursorMovesToEnd:$True
     Set-PSReadLineKeyHandler -Key Tab -ScriptBlock { Invoke-FzfTabCompletion }
-    Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' -PSReadlineChordReverseHistory 'Ctrl+r'
+    Set-PsFzfInstallOptionion -PSReadlineChordProvider 'Ctrl+t' -PSReadlineChordReverseHistory 'Ctrl+r'
     #####
     Register-ArgumentCompleter -Native -CommandName '*' -ScriptBlock {
         param($commandName, $wordToComplete, $cursorPosition)
@@ -735,14 +735,14 @@ function PSRLsetup {
 ## Set Aliases ##
 function AliasSetup {
     #Set aliases for NeoVim
-    Set-Alias -Name vi -Value nvim -Option AllScope -Scope Global -Force
-    Set-Alias -Name vim -Value nvim -Option AllScope -Scope Global -Force
+    Set-Alias -Name vi -Value nvim -InstallOptionion AllScope -Scope Global -Force
+    Set-Alias -Name vim -Value nvim -InstallOptionion AllScope -Scope Global -Force
     # Set UNIX-like aliases for the admin command, so sudo <command> will run the command with elevated rights.
-    Set-Alias -Name su -Value admin -Option AllScope -Scope Global -Force
+    Set-Alias -Name su -Value admin -InstallOptionion AllScope -Scope Global -Force
     # Set aliases for Zoxide
-    Set-Alias -Name z -Value __zoxide_z -Option AllScope -Scope Global -Force
-    Set-Alias -Name zi -Value __zoxide_zi -Option AllScope -Scope Global -Force
-    Set-Alias -Name cd -Value z -Option AllScope -Scope Global -Force
+    Set-Alias -Name z -Value __zoxide_z -InstallOptionion AllScope -Scope Global -Force
+    Set-Alias -Name zi -Value __zoxide_zi -InstallOptionion AllScope -Scope Global -Force
+    Set-Alias -Name cd -Value z -InstallOptionion AllScope -Scope Global -Force
 }
 ## Calls Initialization functions ##
 function PSInit {
@@ -864,7 +864,7 @@ showdns - Shows the current DNS cache.
 
 ReNet - Resets Network, requires restart to take effect.
 
-teleoptout - Opt out of PowerShell Telemetry, must be Admin.
+teleInstallOptionout - InstallOption out of PowerShell Telemetry, must be Admin.
 
 rehis <String> - Removes command from PSReadLine and PS History
 
