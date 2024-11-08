@@ -664,8 +664,36 @@ function ReNet {
     Write-Host "Please remember to restart the computer for changes to take effect." -ForegroundColor Yellow
     }
 }
+## Establish preconfigured WinRM Session  ##
+function rem {
+    param (
+        [string]$CpuName
+    )
+    if (-not $CpuName){
+        Write-Host "Enter ComputerName:" -ForegroundColor Blue
+        $CpuName = Read-Host
+    }
+    Write-Host "Provide your Log-In Credentials for $CpuName :" -ForegroundColor Blue
+    $cred = Get-Credential
+    Write-Host "Starting Remote Session with $CpuName..." -ForegroundColor Yellow
+    $sessionParams = @{
+        ComputerName       = $CpuName
+        Credential         = $cred
+        Authentication     = "CredSSP"
+        ConfigurationName  = "PowerShell.7"
+        ErrorAction        = "Stop"
+    }
 
-## Remove Items from PSReadLine History and PSHistory
+    try {
+        Enter-PSSession @sessionParams
+    }
+    catch {
+        Write-Host "Could not connect to $CpuName." -ForegroundColor Red
+    }
+}
+ 
+############  Remove items from PowerShell History
+## Remove Items from PSReadLine History 
 function Remove-PSReadlineHistory {
     param (
         [Parameter(Mandatory = $true)]
@@ -679,7 +707,7 @@ function Remove-PSReadlineHistory {
 
     Write-Host "Removed $($historyLines.Count - $filteredLines.Count) line(s) from PSReadLine history."
 }
-
+## Removes Items PSHistory
 function Remove-PSHistory {
     param (
         [Parameter(Mandatory = $true)]
@@ -691,7 +719,7 @@ function Remove-PSHistory {
     $matchingLines | ForEach-Object { Clear-History -Id $_.Id }
     Write-Host "Removed $($matchingLines.Count) line(s) from PowerShell history."
 }
-
+## Removes Items from PSHistory and PSReadlineHistory simultaneosly ##
 function rehis {
     param (
         [Parameter(Mandatory = $true)]
@@ -707,7 +735,7 @@ function cpy { Set-Clipboard $args[0] }
 ## Paste ##
 function pst { Get-Clipboard }
 
-####################### CALL PSInit in your Profile Script to start this section ##############
+############### CALL PSInit in your Profile Script to start this section ##############
 ############### SETUP MODULES #################################
 ## Setup Zoxide ##
 function ZoxSetUp {
@@ -934,6 +962,8 @@ flushdns - Clears the DNS cache.
 showdns - Shows the current DNS cache.
 
 ReNet - Resets Network, requires restart to take effect.
+
+rem <ComputerName> - Starts preconfigured WinRm session with 'ComputerName'
 
 rehis <String> - Removes command from PSReadLine and PS History
 
