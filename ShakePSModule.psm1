@@ -561,9 +561,9 @@ function ChangePoshTheme {
     $ThemePath = "$env:LOCALAPPDATA\Programs\oh-my-posh\themes"
     $NewTheme = Get-ChildItem "$ThemePath" | Select-Object Name | fzf
     ChangeOmpThemeInProfile "$NewTheme"
-    Write-Host "Press Enter to Load $NewTheme" -ForegroundColor Yellow
+    Write-Host "Press Enter to Load $NewTheme" -ForegroundColor Green
     Read-Host
-    & $PROFILE
+    SetPoshTheme
     Clear-Host
     return
 }
