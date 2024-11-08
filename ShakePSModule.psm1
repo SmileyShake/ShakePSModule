@@ -555,6 +555,34 @@ function Clear-GlobalAppVariables {
     Remove-Variable -Name AppName, AppID, AppVersion, AppInfo -Scope Global -ErrorAction SilentlyContinue
 }
 
+############# Oh-My-Posh Theme fzf selection ######
+
+function ChangePoshTheme {
+    $ThemePath = "$env:LOCALAPPDATA\Programs\oh-my-posh\themes"
+    $NewTheme = Get-ChildItem "$ThemePath" | Select-Object Name | fzf
+    ChangeOmpThemeInProfile "$NewTheme"
+    Write-Host "Loading New Theme..." -ForegroundColor Yellow
+    & $PROFILE
+    return
+}
+
+function ChangeOmpThemeInProfile {
+    param ()
+    [string]$NewTheme    
+    $ProfilePath = "$PROFILE"
+    $ThemeLinePattern = '(?<=\$OmpTheme\s=\s")[^"]+'
+    $profileContents = Get-Content -Path $ProfilePath -Raw
+    if ($profileContents -notmatch $ThemeLinePattern) {
+        Write-Host "Could not find OmpTheme variable in the profile." -ForegroundColor Red
+        return
+    }
+    $updatedContents = $profileContents -replace $ThemeLinePattern, $NewTheme
+    Set-Content -Path $ProfilePath -Value $updatedContents
+    Write-Host "Theme changed in $PROFILE to:" -ForegroundColor Blue
+    Write-Host "$NewTheme" -ForegroundColor DarkYellow 
+    return
+} 
+    
 ############# System Information ##################
 function sysinfo { Get-ComputerInfo }
 
@@ -849,6 +877,8 @@ winpick - Search for Package with winget using FZF
 winin - Searh for and install Package with winget using FZF
 
 winun -  Uninstall Package with winget using FZF
+
+ChangePoshTheme - Select New Oh-My-Posh Theme with FZF
 
 sysinfo - Displays detailed system information.
 
