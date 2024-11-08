@@ -405,7 +405,6 @@ function winpick {
     # Create a custom object list using Add-Member
     $AppObject = $WingetCommand | ForEach-Object {
         $app = New-Object PSObject
-        $app | Add-Member -MemberType NoteProperty -Name 'PSTypeName'        -Value 'App.Object'
         $app | Add-Member -MemberType NoteProperty -Name 'Name'              -Value $_.Name
         $app | Add-Member -MemberType NoteProperty -Name 'Id'                -Value $_.Id
         $app | Add-Member -MemberType NoteProperty -Name 'Source'            -Value $_.Source
@@ -453,6 +452,12 @@ function winpick {
     return
 }
 
+function winlist {
+    Write-Host "These programs are isntalled.  Choose one for Package Info." -ForegroundColor Blue
+    $PackList = Get-WinGetPackage
+    winpick $PackList
+}
+
 function winin {
     param (
         [string]$PackName
@@ -498,7 +503,7 @@ function winin {
 function StandardInstall {
     try {
         Write-Host "Installing $Global:AppName..." -ForegroundColor Yellow
-        winget install --id $Global:AppId --accept-source-agreements --accept-package-agreements --silent
+        Install-WinGetPackage -Id $Global:AppId -Mode Silent -AllowHashMismatch -ProgressAction Continue -InformationAction Continue
         Write-Host "$Global:AppInfo installed successfully." -ForegroundColor Green
     }
     catch {
@@ -528,7 +533,7 @@ function InstallChoice {
             Start-Process explorer.exe -ArgumentList "$InstallPath"
             Write-Host "$InstallPath will remain empty if winget could not set the Destination" -ForegroundColor Red
             Write-Host "Installing $Global:AppName..." -ForegroundColor Yellow
-            winget install --id $Global:AppId --location $InstallPath --accept-source-agreements --accept-package-agreements --silent
+            Install-WinGetPackage -Id $Global:AppId -Location $InstallPath -Mode Silent -AllowHashMismatch -ProgressAction Continue -InformationAction Continue 
             Write-Host "$Global:AppInfo installed successfully." -ForegroundColor Green             
         }
         catch {
@@ -567,11 +572,11 @@ function winun {
     if ($YorN -match '^[Yy]$') {
         try {
             if ($Global:AppId -like 'ARP/*' -or  $Global:AppId -like 'MSIX/*') {
-                winget uninstall  --id $Global:AppID --source msstore --silent
+                Uninstall-WinGetPackage  -Id $Global:AppID -Source msstore -Mode Silent -Force
                 Write-Host "$Global:AppInfo uninstalled successfully." -ForegroundColor Green
             }
             else {
-                winget uninstall --id $Global:AppID --silent
+                Uninstall-WinGetPackage -Id $Global:AppID -Mode Silent -Force
                 Write-Host "$Global:AppInfo uninstalled successfully." -ForegroundColor Green
             }
         }
@@ -944,6 +949,8 @@ vscan - Opens Malwarebytesa and runs a Defender Quick Scan
 dvs - Runs Defender Quick Scan
 
 winpick - Search for Package with winget using FZF
+
+winlist - Show installed Packages with FZF
 
 winin - Searh for and install Package with winget using FZF
 
