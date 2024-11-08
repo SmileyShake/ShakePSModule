@@ -326,14 +326,16 @@ function winup {
 
     # Check all apps for upgrades
     Write-Host "Checking for app updates via Winget..." -ForegroundColor Blue
-    $wingetUpdates = Get-WinGetPackage -IncludeUnknown | Where-Object IsUpdateAvailable
+    $wingetUpdates = Get-WinGetPackage | Where-Object IsUpdateAvailable
     if (-not $wingetUpdates) {
         Write-Host "All packages are up to date." -ForegroundColor Green        
     }
     else {
         Write-Host "The following updates will be installed via Winget:" -ForegroundColor Yellow
         try {
-            $wingetUpdates | Update-WinGetPackage
+            $wingetUpdates | 
+                Where-Object Id | 
+                Update-WingetPackage -Id $_.Id -Force
             Write-Host "All updates have been installed successfully." -ForegroundColor Green
         } 
         catch {
