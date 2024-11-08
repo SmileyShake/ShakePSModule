@@ -204,27 +204,63 @@ function junk {
         "$env:APPDATA\Mozilla\Firefox\Profiles\*\security_state"    
     )   
     foreach ($Path in $Paths) {
-        Get-ChildItem -Path $Path -Recurse -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+        Get-ChildItem -Path $Path -Recurse -ErrorAction SilentlyContinue | 
+            Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
     }
-    # Stop any running Microsoft Store processes
     try {
         Stop-Process -Name WinStore.App -ErrorAction SilentlyCont
         $cachePath = "$env:LocalAppData\Packages\Microsoft.WindowsStore_8wekyb3d8bbwe\LocalCache"
         Remove-Item -Path $cachePath\* -Recurse -Force        
     }
     catch {
-        # Suppress errors, do nothing
+        Write-Host "Could not Delete: $Path" -ForegroundColor Cyan
     }
     # Delete the contents of the SoftwareDistribution folder, suppress errors
-    Try {
+    try {
         Stop-Service -Name wuauserv -ErrorAction SilentlyContinue 
         Get-ChildItem -Path 'C:\Windows\SoftwareDistribution\Download\*' -Recurse -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
         Start-Service -Name wuauserv -ErrorAction SilentlyContinue
     } 
-    Catch {
-        # Suppress errors, do nothing
+    catch {
+        Write-Host "Could not Delete Software Distribution Download folder" -ForegroundColor Cyan
     }
     Write-Host "Junk Files Deleted." -ForegroundColor Green
+}
+## Starts RAMMap ##
+function rammap { 
+    Write-Host "Starting RAMMap..." -ForegroundColor Yellow        
+    RAMMap64 
+}
+## Starts BleachBit ##
+function bb { 
+    $BleachbitPath = "$HOME\AppData\Local\BleachBit\bleachbit.exe"
+    $UserName = whoami
+    if ($UserName -eq "shake-mini\shake"){
+        $BleachbitPath = "D:\Program Files\BleachBit\bleachbit.exe"
+        }
+    Write-Host "Starting BleachBit..." -ForegroundColor Yellow
+    Start-Process -FilePath $BleachbitPath -Verb RunAs
+    
+ }
+
+function cleanjunk {
+    junk
+    rammap
+    bb
+}
+## Starts HW Monitor and Cinebench ##
+function bench {
+    Write-Host "Starting HW Monitor and Cinebench..." -ForegroundColor Yellow
+    $UserName = whoami
+    $HWMonPath = "C:\Program Files\CPUID\HWMonitor\HWMonitor.exe"
+    $CineBenchPath = "$HOME\AppData\Local\Microsoft\WinGet\Packages\Maxon.CinebenchR23_Microsoft.Winget.Source_8wekyb3d8bbwe\Cinebench.exe"
+    
+    if ($UserName -eq "shake-mini\shake") {
+        $CineBenchPath = "D:\Program Files\CinebenchR23\Cinebench.exe"
+        $HWMonPath = "D:\Program Files\hwmonitor\HWMonitor.exe"
+    }
+    Start-Process -FilePath $HWMonPath -Verb RunAs
+    Start-Process -FilePath $CineBenchPath -Verb RunAs
 }
 ## Update PowerShell, Winget, Programs and Windows ##
 function ud {
@@ -776,7 +812,7 @@ function PSInit {
     AliasSetup
 }
 
-function Show-Help { @"
+function lcom { @"
 PowerShell Profile Help
 =======================
 
@@ -812,27 +848,27 @@ nf <name> - Creates a new file with the specified name.
 
 mkcd <dir> - Creates and changes to a new directory.
 
-Set-Cert <path> - Sets the certificate on the script at the given path...use 'path_to_script'
+Set-Cert <path> - Sets the certificate on the script at 'path\to\script.ps1'
 
-home - Changes the current directory to $HOME.
+home - to Sets the current directory to - $HOME.
 
-Scripts- Changes the current directory to the Scripts folder.
+Scripts- to Sets the current directory to - $PSHOME\Scripts
 
-c - Sets the current directory to C:\
+c - to Sets the current directory to - C:\
 
-d - Sets the current directory to D:\
+d - to Sets the current directory to - D:\
 
-dl- Changes the current directory to the Downloads folder.
+dl- to Sets the current directory to - $HOME\Downloads
 
-docs - Changes the current directory to the Documents folder.
+docs - to Sets the current directory to - $HOME\Documents
 
-dtop - Changes the current directory to the Desktop folder.
+dtop - to Sets the current directory to - $HOME\Desktop
 
-ep - Opens the profile for editing with VSCode.
+ep - Opens $PROFILE for editing with VSCode.
 
-epv - Opens the profile for editing with NeoVim.
+epv - Opens the $PROFILE for editing with NeoVim.
 
-reloadprofile - Reloads the current user's PowerShell profile.
+reloadprofile - Reloads $PROFILE
 
 la - Lists all files in the current directory with detailed formatting.
 
@@ -857,6 +893,14 @@ lazyg <message> - Adds all changes, commits with the specified message, and push
 winutil - Runs the WinUtil script from Chris Titus Tech.
 
 junk - Deletes Temporary Files
+
+rammap - Opens the RAMMap.
+
+bb - Opens BleachBit.
+
+cleanjunk - Deletes Temporary File, Opens BleachBit, and RAMMap.
+
+bench - Opens HW Monitior and Cinebench.
 
 ud - Checks PowerShell, winget and windows for updates and installs any updates found.
 
@@ -913,9 +957,10 @@ rmbb - Starts BleachBit and RAMMap.
 bench - Starts Cinbench and monitors.
 
 
-Use 'Show-Help' to display this help message.
+Use 'lcom' to display this help message.
 "@
 }
+Write-Host "Use 'lcom' to show list of commands'" -ForegroundColor DarkYellow
 ##################################################################
 ##################################################################
 ##################################################################
