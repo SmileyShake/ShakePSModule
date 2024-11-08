@@ -328,21 +328,21 @@ function winup {
     Write-Host "Checking for app updates via Winget..." -ForegroundColor Blue
     $wingetUpdates = Get-WinGetPackage | Where-Object IsUpdateAvailable
     if (-not $wingetUpdates) {
-        Write-Host "All packages are up to date." -ForegroundColor Green        
+        Write-Host "All packages are up to date." -ForegroundColor Green 
+        return       
     }
-    else {
-        Write-Host "The following updates will be installed via Winget:" -ForegroundColor Yellow
-        try {
-            $wingetUpdates | 
-                Where-Object Id | 
-                Update-WingetPackage -Id $_.Id -Force
-            Write-Host "All updates have been installed successfully." -ForegroundColor Green
-        } 
-        catch {
-            Write-Host "An error occurred while installing updates." -ForegroundColor DarkRed
-        }
+    Write-Host "The following updates will be installed via Winget:" -ForegroundColor Yellow
+    try {
+        Get-WinGetPackage | 
+            Where-Object IsUpdateAvailable | 
+            Update-WingetPackage -Id $_.Id -Force
+        Write-Host "All updates have been installed successfully." -ForegroundColor Green
+    } 
+    catch {
+        Write-Host "An error occurred while installing updates." -ForegroundColor DarkRed
     }
 }
+
 function windowup {
     if (-not (Get-Module -ListAvailable -Name PSWindowsUpdate)) {
         Write-Host "PSWindowsUpdate module not found. Installing..." -ForegroundColor Green
@@ -455,7 +455,7 @@ function winpick {
 }
 
 function winlist {
-    Write-Host "These programs are isntalled.  Choose one for Package Info." -ForegroundColor Blue
+    Write-Host "These programs are isntalled.  Select a Package for More Info." -ForegroundColor Blue
     $PackList = Get-WinGetPackage
     winpick $PackList
 }
