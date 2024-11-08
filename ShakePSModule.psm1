@@ -562,7 +562,11 @@ function ChangePoshTheme {
     $NewTheme = Get-ChildItem "$ThemePath" | Select-Object Name | fzf
     ChangeOmpThemeInProfile "$NewTheme"
     Write-Host "Loading New Theme..." -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host ""
+    Write-Host ""
     & $PROFILE
+    return
 }
 
 function ChangeOmpThemeInProfile {
