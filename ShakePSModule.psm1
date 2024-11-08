@@ -503,7 +503,7 @@ function winin {
 function StandardInstall {
     try {
         Write-Host "Installing $Global:AppName..." -ForegroundColor Yellow
-        Install-WinGetPackage -Id $Global:AppId -Mode Silent -AllowHashMismatch -ProgressAction Continue -InformationAction Continue
+        Install-WinGetPackage -Id $Global:AppId -Mode Silent -AllowHashMismatch -InformationAction Continue
         Write-Host "$Global:AppInfo installed successfully." -ForegroundColor Green
     }
     catch {
@@ -533,7 +533,7 @@ function InstallChoice {
             Start-Process explorer.exe -ArgumentList "$InstallPath"
             Write-Host "$InstallPath will remain empty if winget could not set the Destination" -ForegroundColor Red
             Write-Host "Installing $Global:AppName..." -ForegroundColor Yellow
-            Install-WinGetPackage -Id $Global:AppId -Location $InstallPath -Mode Silent -AllowHashMismatch -ProgressAction Continue -InformationAction Continue 
+            Install-WinGetPackage -Id $Global:AppId -Location $InstallPath -Mode Silent -AllowHashMismatch -InformationAction Continue 
             Write-Host "$Global:AppInfo installed successfully." -ForegroundColor Green             
         }
         catch {
