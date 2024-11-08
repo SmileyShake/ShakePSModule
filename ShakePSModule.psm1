@@ -563,7 +563,6 @@ function ChangePoshTheme {
     ChangeOmpThemeInProfile "$NewTheme"
     Write-Host "Loading New Theme..." -ForegroundColor Yellow
     & $PROFILE
-    return
 }
 
 function ChangeOmpThemeInProfile {
