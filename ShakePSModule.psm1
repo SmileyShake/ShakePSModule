@@ -900,7 +900,7 @@ bb - Opens BleachBit.
 
 cleanjunk - Deletes Temporary File, Opens BleachBit, and RAMMap.
 
-bench - Opens HW Monitior and Cinebench.
+bench - Opens HW Monitior and Cinebench R23
 
 ud - Checks PowerShell, winget and windows for updates and installs any updates found.
 
