@@ -562,6 +562,7 @@ function ChangePoshTheme {
     $NewTheme = Get-ChildItem "$ThemePath" | Select-Object Name | fzf
     ChangeOmpThemeInProfile "$NewTheme"
     & $PROFILE
+    Write-Host "Theme Set to $NewTheme" -ForegroundColor Green
     return
 }
 
@@ -577,8 +578,6 @@ function ChangeOmpThemeInProfile {
     }
     $updatedContents = $profileContents -replace $ThemeLinePattern, $NewTheme
     Set-Content -Path $ProfilePath -Value $updatedContents
-    Write-Host "Theme changed in $PROFILE to:" -ForegroundColor Blue
-    Write-Host "$NewTheme" -ForegroundColor DarkYellow 
     return
 } 
     
