@@ -564,7 +564,6 @@ function ChangePoshTheme {
     Write-Host "Press Enter to Load $NewTheme" -ForegroundColor Green
     Read-Host
     SetPoshTheme
-    Clear-Host
     return
 }
 
