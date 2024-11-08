@@ -563,7 +563,7 @@ function ChangePoshTheme {
     ChangeOmpThemeInProfile "$NewTheme"
     Write-Host "Press Enter to Load $NewTheme" -ForegroundColor Green
     Read-Host
-    SetPoshTheme
+    reloadprofile
     return
 }
 
