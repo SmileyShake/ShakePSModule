@@ -508,11 +508,12 @@ function StandardInstall {
         $StandardInstallParam = @{
             Id                  = $Global:AppId
             Mode                = "Silent"
+            InformationAction   = "Continue"        
             AllowHashMismatch   = "True"
-            InformationAction   = "Continue"
+            Force               = "True"    
         }
         Write-Host "Installing $Global:AppName..." -ForegroundColor Yellow
-        Install-WinGetPackage $StandardInstallParam
+        Install-WinGetPackage $StandardInstallParam 
         Write-Host "$Global:AppInfo installed successfully." -ForegroundColor Green
     }
     catch {
@@ -548,6 +549,7 @@ function InstallChoice {
                 Mode                = "Silent"
                 AllowHashMismatch   = "True"
                 InformationAction   = "Continue"
+                Force               = "True"
                 }
             Install-WinGetPackage $InstallChoiceParam 
             Write-Host "$Global:AppInfo installed successfully." -ForegroundColor Green             
