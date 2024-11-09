@@ -332,11 +332,10 @@ function winup {
         Write-Host "All packages are up to date." -ForegroundColor Green 
         return       
     }
-    Write-Host "The following updates will be installed via Winget:" -ForegroundColor Yellow
+    Write-Host "Attempting to Update the following Packages via Winget:" -ForegroundColor Yellow
+    Write-Host "$wingetUpdates" -ForegroundColor Cyan
     try {
-        Get-WinGetPackage | 
-            Where-Object IsUpdateAvailable | 
-            Update-WingetPackage -Id $_.Id -Force
+        winget upgrade --all --accept-package-agreements --accept-source-agreements --uninstall-previous --force
         Write-Host "All updates have been installed successfully." -ForegroundColor Green
     } 
     catch {
@@ -445,8 +444,6 @@ function winpick {
             $Global:AppId       = $_.Id
             $Global:AppInfo     = "$Global:AppName  (Id: $Global:AppId | Version: $Global:AppVersion)"
         }
-        
-        # Display selected app details
         Write-Host "You selected:" -ForegroundColor Blue
         $Global:FullAppInfo = $selectApp | Format-List   
         Write-Host "$Global:AppInfo" -ForegroundColor DarkGreen
