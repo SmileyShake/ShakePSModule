@@ -282,7 +282,8 @@ function psup {
         if ($updateNeeded) {
             Write-Host "Updating PowerShell..." -ForegroundColor Yellow
             winget upgrade "Microsoft.PowerShell" --accept-source-agreements --accept-package-agreements
-            Write-Host "PowerShell has been updated. Please restart your shell to reflect changes" -ForegroundColor Magenta
+            Write-Host "PowerShell has been updated." -ForegroundColor Green
+            Write-Host "Please restart your shell to reflect changes" -ForegroundColor Magenta
         } else {
             Write-Host "Current PowerShell Version:  $currentVersion" -ForegroundColor Yellow
             Write-Host "PowerShell is up to date." -ForegroundColor Green
@@ -439,10 +440,10 @@ function winpick {
         }
         # Set global variables with selected app information
         $selectApp | ForEach-Object {
-            $Global:AppName = $_.Name 
-            $Global:AppVersion = $_.Version 
-            $Global:AppId = $_.Id
-            $Global:AppInfo = "$Global:AppName  (Id: $Global:AppId | Version: $Global:AppVersion)"
+            $Global:AppName     = $_.Name 
+            $Global:AppVersion  = $_.Version 
+            $Global:AppId       = $_.Id
+            $Global:AppInfo     = "$Global:AppName  (Id: $Global:AppId | Version: $Global:AppVersion)"
         }
         
         # Display selected app details
@@ -504,8 +505,14 @@ function winin {
 ## Standard Winget Installation ##
 function StandardInstall {
     try {
+        $StandardInstallParam = @{
+            Id                  = $Global:AppId
+            Mode                = "Silent"
+            AllowHashMismatch   = "True"
+            InformationAction   = "Continue"
+        }
         Write-Host "Installing $Global:AppName..." -ForegroundColor Yellow
-        Install-WinGetPackage -Id $Global:AppId -Mode Silent -AllowHashMismatch -InformationAction Continue
+        Install-WinGetPackage $StandardInstallParam
         Write-Host "$Global:AppInfo installed successfully." -ForegroundColor Green
     }
     catch {
@@ -535,7 +542,14 @@ function InstallChoice {
             Start-Process explorer.exe -ArgumentList "$InstallPath"
             Write-Host "$InstallPath will remain empty if winget could not set the Destination" -ForegroundColor Red
             Write-Host "Installing $Global:AppName..." -ForegroundColor Yellow
-            Install-WinGetPackage -Id $Global:AppId -Location $InstallPath -Mode Silent -AllowHashMismatch -InformationAction Continue 
+            $InstallChoiceParam     = @{
+                Id                  = $Global:AppId
+                Location            = $InstallPath
+                Mode                = "Silent"
+                AllowHashMismatch   = "True"
+                InformationAction   = "Continue"
+                }
+            Install-WinGetPackage $InstallChoiceParam 
             Write-Host "$Global:AppInfo installed successfully." -ForegroundColor Green             
         }
         catch {
@@ -595,7 +609,13 @@ function winun {
     return
 }
 function Clear-GlobalAppVariables {
-    Remove-Variable -Name AppName, AppID, AppVersion, AppInfo -Scope Global -ErrorAction SilentlyContinue
+    $GlobalVariables = @(
+        "AppName",
+        "AppID",
+        "AppVersion",
+        "AppInfo"
+        )
+    Remove-Variable -Name $GlobalVariables -Scope Global -ErrorAction SilentlyContinue
 }
 
 ############# Oh-My-Posh Theme fzf selection ######
@@ -630,9 +650,14 @@ function sysinfo { Get-ComputerInfo }
 
 function uptime {
     if ($PSVersionTable.PSVersion.Major -eq 5) {
-        Get-WmiObject win32_operatingsystem | Select-Object @{Name='LastBootUpTime'; Expression={$_.ConverttoDateTime($_.lastbootuptime)}} | Format-Table -HideTableHeaders
+        Get-WmiObject win32_operatingsystem | 
+            Select-Object @{Name='LastBootUpTime';
+            Expression={$_.ConverttoDateTime($_.lastbootuptime)}} | 
+            Format-Table -HideTableHeaders
     } else {
-        net statistics workstation | Select-String "since" | ForEach-Object { $_.ToString().Replace('Statistics since ', '') }
+        net statistics workstation | 
+            Select-String "since" | 
+            ForEach-Object { $_.ToString().Replace('Statistics since ', '') }
     }
 }
 
