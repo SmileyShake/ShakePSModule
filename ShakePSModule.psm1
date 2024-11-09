@@ -333,7 +333,6 @@ function winup {
         return       
     }
     Write-Host "Attempting to Update the following Packages via Winget:" -ForegroundColor Yellow
-    Write-Host "$wingetUpdates" -ForegroundColor Cyan
     try {
         winget upgrade --all --accept-package-agreements --accept-source-agreements --uninstall-previous --force
         Write-Host "All updates have been installed successfully." -ForegroundColor Green
