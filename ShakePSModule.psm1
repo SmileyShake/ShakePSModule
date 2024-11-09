@@ -596,7 +596,8 @@ function Clear-GlobalAppVariables {
         "AppName",
         "AppID",
         "AppVersion",
-        "AppInfo"
+        "AppInfo",
+        "FullAppInfo"
         )
     Remove-Variable -Name $GlobalVariables -Scope Global -ErrorAction SilentlyContinue
 }
