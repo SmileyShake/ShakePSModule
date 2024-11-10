@@ -858,7 +858,7 @@ function PSInit {
     AliasSetup
 }
 
-function list-com { @"
+function listcom { @"
 PowerShell Profile Help
 =======================
 
@@ -1010,7 +1010,7 @@ bench - Starts Cinbench and monitors.
 Use 'lcom' to display this help message.
 "@
 }
-Write-Host "Use 'list-com' to show list of commands" -ForegroundColor DarkYellow
+Write-Host "Use 'listcom' to show list of commands" -ForegroundColor DarkYellow
 ##################################################################
 ##################################################################
 ##################################################################
