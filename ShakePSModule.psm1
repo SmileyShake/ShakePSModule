@@ -1007,7 +1007,7 @@ rmbb - Starts BleachBit and RAMMap.
 bench - Starts Cinbench and monitors.
 
 
-Use 'lcom' to display this help message.
+Use 'listcom' to display this help message.
 "@
 }
 Write-Host "Use 'listcom' to show list of commands" -ForegroundColor DarkYellow
