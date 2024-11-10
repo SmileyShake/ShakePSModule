@@ -858,7 +858,7 @@ function PSInit {
     AliasSetup
 }
 
-function listcom { @"
+function list-com { @"
 PowerShell Profile Help
 =======================
 
