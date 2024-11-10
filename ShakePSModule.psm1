@@ -455,6 +455,7 @@ function winlist {
     Write-Host "These programs are isntalled.  Select a Package for More Info." -ForegroundColor Blue
     $PackList = Get-WinGetPackage
     winpick $PackList
+    Clear-GlobalAppVariables
 }
 
 function winin {
@@ -857,7 +858,7 @@ function PSInit {
     AliasSetup
 }
 
-function lcom { @"
+function listcom { @"
 PowerShell Profile Help
 =======================
 
@@ -1009,7 +1010,7 @@ bench - Starts Cinbench and monitors.
 Use 'lcom' to display this help message.
 "@
 }
-Write-Host "Use 'lcom' to show list of commands'" -ForegroundColor DarkYellow
+Write-Host "Use 'list-com' to show list of commands" -ForegroundColor DarkYellow
 ##################################################################
 ##################################################################
 ##################################################################
