@@ -608,6 +608,10 @@ function Clear-GlobalAppVariables {
 function ChangePoshTheme {
     $ThemePath = "$env:LOCALAPPDATA\Programs\oh-my-posh\themes"
     $NewTheme = Get-ChildItem "$ThemePath" | Select-Object Name | fzf
+    if (-not $NewTheme) {
+        Write-Host "No theme selected." -ForegroundColor DarkRed
+        return
+    }
     ChangeOmpThemeInProfile "$NewTheme"
     & $PROFILE
     Clear-Host
