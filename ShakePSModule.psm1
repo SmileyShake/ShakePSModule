@@ -503,7 +503,7 @@ function winin {
 function StandardInstall {
     try {
         Write-Host "Installing $Global:AppName..." -ForegroundColor Yellow
-        winget install --id $Global:AppID --accept-package-agreements --accept-source-agreements --disable-interactivity
+        winget install --id $Global:AppID --accept-package-agreements --accept-source-agreements --disable-interactivity --silent
         Write-Host "$Global:AppInfo installed successfully." -ForegroundColor Green
     }
     catch {
@@ -533,7 +533,7 @@ function InstallChoice {
             Start-Process explorer.exe -ArgumentList "$InstallPath"
             Write-Host "$InstallPath will remain empty if winget could not set the Destination" -ForegroundColor Red
             Write-Host "Installing $Global:AppName..." -ForegroundColor Yellow
-            winget install --id $Global:AppID --location $InstallPath --accept-package-agreements --accept-source-agreements --disable-interactivity
+            winget install --id $Global:AppID --location $InstallPath --accept-package-agreements --accept-source-agreements --disable-interactivity --silent
             Write-Host "$Global:AppInfo installed successfully." -ForegroundColor Green             
         }
         catch {
@@ -572,11 +572,11 @@ function winun {
     if ($YorN -match '^[Yy]$') {
         try {
             if ($Global:AppId -like 'ARP/*' -or  $Global:AppId -like 'MSIX/*') {
-                winget uninstall --id $Global:AppID --all-versions --accept-source-agreements --disable-interactivity --authentication-mode silent --purge --force 
+                winget uninstall --id $Global:AppID --all-versions --accept-source-agreements --disable-interactivity --authentication-mode silent --purge --force  --silent
                 Write-Host "$Global:AppInfo uninstalled successfully." -ForegroundColor Green
             }
             else {
-                winget uninstall --id $Global:AppID --accept-source-agreements --disable-interactivity --authentication-mode silent --purge --force
+                winget uninstall --id $Global:AppID --accept-source-agreements --disable-interactivity --authentication-mode silent --purge --force --silent
                 Write-Host "$Global:AppInfo uninstalled successfully." -ForegroundColor Green
             }
         }
