@@ -604,6 +604,21 @@ function Clear-GlobalAppVariables {
 }
 
 ############# Oh-My-Posh Theme fzf selection ######
+# Set Oh-My-Posh Theme 
+function SetOmpTheme {
+    $OmpThemeLocation = "$env:LOCALAPPDATA\Programs\oh-my-posh\themes"
+    if (-not $OmpTheme) {
+        ChangePoshTheme
+    }
+    $OmpThemePath = Join-Path $OmpThemeLocation $OmpTheme
+    $FZFThemePath = Test-Path $OmpThemePath
+    if (-not $FZFThemePath ) {
+        Write-Host "$OmpTheme not found." -ForegroundColor Red
+        Write-Host "Select another Oh-My-Posh Theme." -ForegroundColor DarkYellow
+        ChangePoshTheme        
+    }
+    oh-my-posh init pwsh --config $OmpThemePath | Invoke-Expression
+}
 
 function ChangePoshTheme {
     $ThemePath = "$env:LOCALAPPDATA\Programs\oh-my-posh\themes"
@@ -613,9 +628,11 @@ function ChangePoshTheme {
         return
     }
     ChangeOmpThemeInProfile "$NewTheme"
-    & $PROFILE
+    $OmpTheme = $NewTheme
+    SetOmpTheme
     Clear-Host
     Write-Host "Theme Set to $NewTheme" -ForegroundColor Green
+    Write-Host "Profile Location: $PROFILE " -ForegroundColor Yellow
     return
 }
 
@@ -623,13 +640,13 @@ function ChangeOmpThemeInProfile {
     param ()
     [string]$NewTheme    
     $ProfilePath = $PROFILE
-    $ThemeLinePattern = '(?<=\$OmpTheme\s=\s")[^"]+'
+    $OmpThemeInProfile = '(?<=\$OmpTheme\s=\s")[^"]+'
     $profileContents = Get-Content -Path $ProfilePath -Raw
-    if ($profileContents -notmatch $ThemeLinePattern) {
+    if ($profileContents -notmatch $OmpThemeInProfile) {
         Write-Host "Could not find OmpTheme variable in the profile." -ForegroundColor Red
         return
     }
-    $updatedContents = $profileContents -replace $ThemeLinePattern, $NewTheme
+    $updatedContents = $profileContents -replace $OmpThemeInProfile, $NewTheme
     Set-Content -Path $ProfilePath -Value $updatedContents
     return
 } 
@@ -856,6 +873,9 @@ function AliasSetup {
 }
 ## Calls Initialization functions ##
 function PSInit {
+    param ()
+    [string]$OmpTheme 
+    SetOmpTheme
     ModInstall
     PSRLsetup
     ZoxSetUp
