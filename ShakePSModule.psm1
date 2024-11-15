@@ -309,7 +309,7 @@ function winup {
     }
     Write-Host "Checking Winget for Updates..." -ForegroundColor Blue
     $wingetVersion = winget --version
-    $wingetUpdateAvailable = winget upgrade --source winget | Where-Object { $_ -match "winget" }
+    $wingetUpdateAvailable = winget upgrade --source winget --silent | Where-Object { $_ -match "winget" }
     if ($wingetUpdateAvailable) {
         Write-Host "Updating Winget..." -ForegroundColor Blue
         try {
