@@ -603,8 +603,7 @@ function winun {
     if ($YorN -match '^[Yy]$') {
         $wingetUninstallArgs = @(
             "--accept-source-agreements"
-            "--disable-interactivity"
-            "--authentication-mode silent"
+            "--disable-interactivity"                            
             "--silent"
             "--purge"
             "--force"
