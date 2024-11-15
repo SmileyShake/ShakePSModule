@@ -628,7 +628,7 @@ function ChangePoshTheme {
         return
     }
     ChangeOmpThemeInProfile "$NewTheme"
-    SetOmpTheme
+    & $PROFILE
     Clear-Host
     Write-Host "Theme Set to $NewTheme" -ForegroundColor Green
     Write-Host "Profile Location: $PROFILE " -ForegroundColor Yellow
