@@ -606,10 +606,9 @@ function Clear-GlobalAppVariables {
 ############# Oh-My-Posh Theme fzf selection ######
 # Set Oh-My-Posh Theme 
 function SetOmpTheme {
+    param ()
+    [string]$OmpTheme
     $OmpThemeLocation = "$env:LOCALAPPDATA\Programs\oh-my-posh\themes"
-    if (-not $OmpTheme) {
-        ChangePoshTheme
-    }
     $OmpThemePath = Join-Path $OmpThemeLocation $OmpTheme
     $FZFThemePath = Test-Path $OmpThemePath
     if (-not $FZFThemePath ) {
@@ -774,23 +773,6 @@ function pst { Get-Clipboard }
 
 ############### CALL PSInit in your Profile Script to start this section ##############
 ############### SETUP MODULES #################################
-## Setup Zoxide ##
-function ZoxSetUp {
-    if (Get-Command zoxide -ErrorAction SilentlyContinue) {
-        Invoke-Expression (& { (zoxide init powershell | Out-String) }) 
-    } 
-    else {
-        Write-Host "zoxide command not found. Attempting to install via winget..." -ForegroundColor Blue
-        try {
-            winget install -e --id ajeetdsouza.zoxide
-            Write-Host "zoxide installed successfully. Initializing..." -ForegroundColor Green
-            Invoke-Expression (& { (zoxide init powershell | Out-String) })
-        }
-        catch {
-            Write-Error "Failed to install zoxide. Error: $_" -ForegroundColor Red
-        }
-    }
-}
 ## Install Modules ##
 function ModInstall {
     $modName = @(
@@ -858,6 +840,23 @@ function PSRLsetup {
         Invoke-CompletionPredictor -WordToComplete $wordToComplete -CursorPosition $cursorPosition
     }
 }
+## Setup Zoxide ##
+function ZoxSetUp {
+    if (Get-Command zoxide -ErrorAction SilentlyContinue) {
+        Invoke-Expression (& { (zoxide init powershell | Out-String) }) 
+    } 
+    else {
+        Write-Host "zoxide command not found. Attempting to install via winget..." -ForegroundColor Blue
+        try {
+            winget install -e --id ajeetdsouza.zoxide
+            Write-Host "zoxide installed successfully. Initializing..." -ForegroundColor Green
+            Invoke-Expression (& { (zoxide init powershell | Out-String) })
+        }
+        catch {
+            Write-Error "Failed to install zoxide. Error: $_" -ForegroundColor Red
+        }
+    }
+}
 ## Set Aliases ##
 function AliasSetup {
     #Set aliases for NeoVim
@@ -872,9 +871,6 @@ function AliasSetup {
 }
 ## Calls Initialization functions ##
 function PSInit {
-    param ()
-    [string]$OmpTheme 
-    SetOmpTheme
     ModInstall
     PSRLsetup
     ZoxSetUp
