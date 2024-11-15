@@ -172,6 +172,24 @@ function lazyg {
 function winutil {
 	Invoke-WebRequest -useb https://christitus.com/win | Invoke-Expression
 }
+
+########## Junk Files and Ram Clean Up ############
+## Starts BleachBit ##
+function bb { 
+    $BleachbitPath = "$HOME\AppData\Local\BleachBit\bleachbit.exe"
+    $UserName = whoami
+    if ($UserName -eq "shake-mini\shake"){
+        $BleachbitPath = "D:\Program Files\BleachBit\bleachbit.exe"
+        }
+    Write-Host "Starting BleachBit..." -ForegroundColor Yellow
+    Start-Process -FilePath $BleachbitPath -Verb RunAs
+    
+}
+## Starts RAMMap ##
+function rammap { 
+    Write-Host "Starting RAMMap..." -ForegroundColor Yellow        
+    RAMMap64 
+}
 ## Delete Junk Files ##
 function junk {
     $Paths = @(
@@ -203,7 +221,9 @@ function junk {
         "$env:APPDATA\Mozilla\Firefox\Profiles\*\content-prefs.sqlite"
         "$env:APPDATA\Mozilla\Firefox\Profiles\*\security_state"    
     )   
+    Write-Host "Deleting Junk Files from: " -ForegroundColor Blue 
     foreach ($Path in $Paths) {
+        Write-Host $Path -ForegroundColor Cyan
         Get-ChildItem -Path $Path -Recurse -ErrorAction SilentlyContinue | 
             Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
     }
@@ -226,27 +246,11 @@ function junk {
     }
     Write-Host "Junk Files Deleted." -ForegroundColor Green
 }
-## Starts RAMMap ##
-function rammap { 
-    Write-Host "Starting RAMMap..." -ForegroundColor Yellow        
-    RAMMap64 
-}
-## Starts BleachBit ##
-function bb { 
-    $BleachbitPath = "$HOME\AppData\Local\BleachBit\bleachbit.exe"
-    $UserName = whoami
-    if ($UserName -eq "shake-mini\shake"){
-        $BleachbitPath = "D:\Program Files\BleachBit\bleachbit.exe"
-        }
-    Write-Host "Starting BleachBit..." -ForegroundColor Yellow
-    Start-Process -FilePath $BleachbitPath -Verb RunAs
-    
- }
-
+## Delete Junk Files, Open RamMap and BleachBit  ##
 function cleanjunk {
-    junk
-    rammap
     bb
+    rammap
+    junk
 }
 ## Starts HW Monitor and Cinebench ##
 function bench {
@@ -262,12 +266,8 @@ function bench {
     Start-Process -FilePath $HWMonPath -Verb RunAs
     Start-Process -FilePath $CineBenchPath -Verb RunAs
 }
-## Update PowerShell, Winget, Programs and Windows ##
-function ud {
-    psup
-    winup
-    windowup
-}
+##########   UPDATES   ##########
+### Update PowerShell ##
 function psup {
     try {
         Write-Host "Checking for PowerShell Updates..." -ForegroundColor Blue
@@ -292,6 +292,8 @@ function psup {
         Write-Error "Failed to update PowerShell. Error: $_" -ForegroundColor DarkRed
     }
 }
+
+### Update Winget ###
 function winup {
     if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
         Write-Host "Winget is not installed. Installing Winget now..." -ForegroundColor Blue
@@ -309,7 +311,8 @@ function winup {
     }
     Write-Host "Checking Winget for Updates..." -ForegroundColor Blue
     $wingetVersion = winget --version
-    $wingetUpdateAvailable = winget upgrade --source winget --silent | Where-Object { $_ -match "winget" }
+    $wingetUpdateAvailable = winget upgrade --source winget --silent | 
+        Where-Object { $_ -match "winget" }
     if ($wingetUpdateAvailable) {
         Write-Host "Updating Winget..." -ForegroundColor Blue
         try {
@@ -324,8 +327,10 @@ function winup {
         Write-Host "Current Winget version: $wingetVersion" -ForegroundColor Yellow 
         Write-Host "Winget is up to date." -ForegroundColor Green       
     }  
+}
 
     # Check all apps for upgrades
+function winupall {
     Write-Host "Checking for app updates via Winget..." -ForegroundColor Blue
     $wingetUpdates = Get-WinGetPackage | Where-Object IsUpdateAvailable
     if (-not $wingetUpdates) {
@@ -334,7 +339,13 @@ function winup {
     }
     Write-Host "Attempting to Update the following Packages via Winget:" -ForegroundColor Yellow
     try {
-        winget upgrade --all --accept-package-agreements --accept-source-agreements --force
+        $wingetUpdateArgs = @(
+            "--accept-package-agreements"
+            "--accept-source-agreements"
+            "--silent"
+            "--force"
+        )
+        winget upgrade --all @wingetUpdateArgs
         Write-Host "All updates have been installed successfully." -ForegroundColor Green
     } 
     catch {
@@ -361,17 +372,15 @@ function windowup {
         Write-Host "Windows is up to date." -ForegroundColor Green
     }
 }
+## Update PowerShell, Winget, Programs and Windows ##
+function ud {
+    psup
+    winup
+    winupall
+    windowup
+}
 
 ##  Virus Scan  ##
-function vscan {
-    # Start Malwarebytes with elevated privileges
-    $UserName = whoami
-    if ("$UserName" -eq "shake-mini\shake") {
-        Start-Process -FilePath "D:\Program Files\Malwarebytes\Malwarebytes.exe" -Verb RunAs
-        Write-Host "Starting MalwareBytes..." -ForegroundColor Yellow
-    }
-    dvs
-}
 function dvs {    
     Update-MpSignature -UpdateSource MicrosoftUpdateServer
     Write-Host "Starting Windows Defender Quick Scan..." -ForegroundColor Blue
@@ -388,6 +397,16 @@ function dvs {
     else {
         Write-Host "No threats detected by Windows Defender." -ForegroundColor Green
     }               
+}
+## Virus Scan with Malwarebytes ##
+function vscan {
+    # Start Malwarebytes with elevated privileges
+    $UserName = whoami
+    if ("$UserName" -eq "shake-mini\shake") {
+        Start-Process -FilePath "D:\Program Files\Malwarebytes\Malwarebytes.exe" -Verb RunAs
+        Write-Host "Starting MalwareBytes..." -ForegroundColor Yellow
+    }
+    dvs
 }
 ###############################################################################
 # Winget with FZF search and select
@@ -501,9 +520,15 @@ function winin {
 }
 ## Standard Winget Installation ##
 function StandardInstall {
+    $wingetInstallArgs = @(
+        "--accept-package-agreements"
+        "--accept-source-agreements"
+        "--disable-interactivity"
+        "--silent"
+    )
     try {
         Write-Host "Installing $Global:AppName..." -ForegroundColor Yellow
-        winget install --id $Global:AppID --accept-package-agreements --accept-source-agreements --disable-interactivity --silent
+        winget install --id $Global:AppID $wingetInstallArgs
         Write-Host "$Global:AppInfo installed successfully." -ForegroundColor Green
     }
     catch {
@@ -533,7 +558,13 @@ function InstallChoice {
             Start-Process explorer.exe -ArgumentList "$InstallPath"
             Write-Host "$InstallPath will remain empty if winget could not set the Destination" -ForegroundColor Red
             Write-Host "Installing $Global:AppName..." -ForegroundColor Yellow
-            winget install --id $Global:AppID --location $InstallPath --accept-package-agreements --accept-source-agreements --disable-interactivity --silent
+            $wingetChoiceArgs = @(
+                "--accept-package-agreements"
+                "--accept-source-agreements"
+                "--disable-interactivity"
+                "--silent"
+            )
+            winget install --id $Global:AppID --location $InstallPath $wingetChoiceArgs
             Write-Host "$Global:AppInfo installed successfully." -ForegroundColor Green             
         }
         catch {
@@ -570,13 +601,21 @@ function winun {
     Write-Host "Uninstall [y] or [n]?" -ForegroundColor DarkRed
     $YorN = Read-Host
     if ($YorN -match '^[Yy]$') {
+        $wingetUninstallArgs = @(
+            "--accept-source-agreements"
+            "--disable-interactivity"
+            "--authentication-mode silent"
+            "--silent"
+            "--purge"
+            "--force"
+        )
         try {
             if ($Global:AppId -like 'ARP/*' -or  $Global:AppId -like 'MSIX/*') {
-                winget uninstall --id $Global:AppID --all-versions --accept-source-agreements --disable-interactivity --authentication-mode silent --purge --force  --silent
+                winget uninstall --id $Global:AppID --all-versions $wingetUninstallArgs
                 Write-Host "$Global:AppInfo uninstalled successfully." -ForegroundColor Green
             }
             else {
-                winget uninstall --id $Global:AppID --accept-source-agreements --disable-interactivity --authentication-mode silent --purge --force --silent
+                winget uninstall --id $Global:AppID $wingetUninstallArgs 
                 Write-Host "$Global:AppInfo uninstalled successfully." -ForegroundColor Green
             }
         }
