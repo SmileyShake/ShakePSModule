@@ -223,7 +223,7 @@ function junk {
     )   
     Write-Host "Deleting Junk Files from: " -ForegroundColor Blue 
     foreach ($Path in $Paths) {
-        Write-Host $Path -ForegroundColor Cyan
+        Write-Host "    $Path " -ForegroundColor Cyan
         Get-ChildItem -Path $Path -Recurse -ErrorAction SilentlyContinue | 
             Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
     }
