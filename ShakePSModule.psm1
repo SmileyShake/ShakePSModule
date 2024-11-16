@@ -221,7 +221,7 @@ function junk {
         "$env:APPDATA\Mozilla\Firefox\Profiles\*\content-prefs.sqlite"
         "$env:APPDATA\Mozilla\Firefox\Profiles\*\security_state"    
     )   
-    Write-Host "Deleting Junk Files from: " -ForegroundColor Blue 
+    Write-Host "Deleting Junk Files from: " -ForegroundColor DarkCyan 
     foreach ($Path in $Paths) {
         Write-Host "    $Path " -ForegroundColor Cyan
         Get-ChildItem -Path $Path -Recurse -ErrorAction SilentlyContinue | 
@@ -270,7 +270,7 @@ function bench {
 ### Update PowerShell ##
 function psup {
     try {
-        Write-Host "Checking for PowerShell Updates..." -ForegroundColor Blue
+        Write-Host "Checking for PowerShell Updates..." -ForegroundColor DarkCyan
         $updateNeeded = $false
         $currentVersion = $PSVersionTable.PSVersion.ToString()
         $gitHubApiUrl = "https://api.github.com/repos/PowerShell/PowerShell/releases/latest"
@@ -295,7 +295,7 @@ function psup {
 ## Update Winget ##
 function winup {
     if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
-        Write-Host "Winget is not installed. Installing Winget now..." -ForegroundColor Blue
+        Write-Host "Winget is not installed. Installing Winget now..." -ForegroundColor DarkCyan
         $installerUrl = "https://aka.ms/getwinget"
         $tempInstallerPath = "$env:TEMP\winget_installer.msixbundle"
         try {
@@ -308,7 +308,7 @@ function winup {
         }
         return
     }
-    Write-Host "Checking Winget for Updates..." -ForegroundColor Blue
+    Write-Host "Checking Winget for Updates..." -ForegroundColor DarkCyan
     $wingetUpgrade = winget upgrade winget
     $wingetVersion = winget --version
     if ($wingetUpgrade -like "*No available upgrade found*") {
@@ -330,7 +330,7 @@ function winup {
 }
 ## Check all apps for upgrades ##
 function winupall {
-    Write-Host "Checking for app updates via Winget..." -ForegroundColor Blue
+    Write-Host "Checking for app updates via Winget..." -ForegroundColor DarkCyan
     $wingetUpdates = Get-WinGetPackage | Where-Object IsUpdateAvailable
     if (-not $wingetUpdates) {
         Write-Host "All packages are up to date." -ForegroundColor Green 
@@ -357,13 +357,13 @@ function windowup {
         Write-Host "PSWindowsUpdate module not found. Installing..." -ForegroundColor Green
         Install-Module -Name PSWindowsUpdate -Force -Scope CurrentUser -AllowClobber
     }
-    Write-Host "Checking for Windows Updates..." -ForegroundColor Blue
+    Write-Host "Checking for Windows Updates..." -ForegroundColor DarkCyan
     Import-Module PSWindowsUpdate
     $updates = Get-WindowsUpdate 
     if ($updates) {
         Write-Host "The following updates will be installed:" -ForegroundColor Yellow
         $updates | Format-Table -Property Title, Size, KBArticleIDs
-        Write-Host "Installing Windows updates..." -ForegroundColor Blue
+        Write-Host "Installing Windows updates..." -ForegroundColor DarkCyan
         Write-Host "The computer may restart automatically." -ForegroundColor DarkRed
         Install-WindowsUpdate -AcceptAll -AutoReboot
     }
@@ -382,7 +382,7 @@ function ud {
 ##  Virus Scan  ##
 function dvs {    
     Update-MpSignature -UpdateSource MicrosoftUpdateServer
-    Write-Host "Starting Windows Defender Quick Scan..." -ForegroundColor Blue
+    Write-Host "Starting Windows Defender Quick Scan..." -ForegroundColor DarkCyan
     # Start a quick scan
     $scanResult = Start-MpScan -ScanType QuickScan
     $scanResult | Wait-Job    
@@ -416,7 +416,7 @@ function winpick {
     Clear-GlobalAppVariables
     # Prompt for a package name if $WingetCommand is not provided
     if (-not $WingetCommand) {
-        Write-Host "Enter Package To Search For:" -ForegroundColor Blue
+        Write-Host "Enter Package To Search For:" -ForegroundColor DarkCyan
         $PackName =  Read-Host
         $WingetCommand = Find-WingetPackage $PackName
     }
@@ -461,7 +461,7 @@ function winpick {
             $Global:AppId       = $_.Id
             $Global:AppInfo     = "$Global:AppName  (Id: $Global:AppId | Version: $Global:AppVersion)"
         }
-        Write-Host "You selected:" -ForegroundColor Blue
+        Write-Host "You selected:" -ForegroundColor DarkCyan
         $Global:FullAppInfo = $selectApp | Format-List   
         Write-Host "$Global:AppInfo" -ForegroundColor DarkGreen
         $Global:FullAppInfo
@@ -470,7 +470,7 @@ function winpick {
 }
 
 function winlist {
-    Write-Host "These programs are isntalled.  Select a Package for More Info." -ForegroundColor Blue
+    Write-Host "These programs are isntalled.  Select a Package for More Info." -ForegroundColor DarkCyan
     $PackList = Get-WinGetPackage
     winpick $PackList
     Clear-GlobalAppVariables
@@ -552,7 +552,7 @@ function InstallChoice {
         try {
             $InstallPath = "D:\Program Files\$Global:AppName"
             New-Item -ItemType Directory -Path $InstallPath -Force | Out-Null
-            Write-Host "New folder created: $InstallPath" -ForegroundColor Blue
+            Write-Host "New folder created: $InstallPath" -ForegroundColor DarkCyan
             Write-Host "Opening $InstallPath check for successful operation." -ForegroundColor Yellow
             Start-Process explorer.exe -ArgumentList "$InstallPath"
             Write-Host "$InstallPath will remain empty if winget could not set the Destination" -ForegroundColor Red
@@ -624,7 +624,7 @@ function winun {
         }
     }
     else {
-        Write-Host "$Global:AppInfo is still installed." -ForegroundColor Blue
+        Write-Host "$Global:AppInfo is still installed." -ForegroundColor DarkCyan
     }
     Clear-GlobalAppVariables
     return
@@ -743,10 +743,10 @@ function rem {
         [string]$CpuName
     )
     if (-not $CpuName){
-        Write-Host "Enter ComputerName:" -ForegroundColor Blue
+        Write-Host "Enter ComputerName:" -ForegroundColor DarkCyan
         $CpuName = Read-Host
     }
-    Write-Host "Provide your Log-In Credentials for $CpuName :" -ForegroundColor Blue
+    Write-Host "Provide your Log-In Credentials for $CpuName :" -ForegroundColor DarkCyan
     $cred = Get-Credential
     Write-Host "Starting Remote Session with $CpuName..." -ForegroundColor Yellow
     $sessionParams = @{
@@ -883,7 +883,7 @@ function ZoxSetUp {
         Invoke-Expression (& { (zoxide init powershell | Out-String) }) 
     } 
     else {
-        Write-Host "zoxide command not found. Attempting to install via winget..." -ForegroundColor Blue
+        Write-Host "zoxide command not found. Attempting to install via winget..." -ForegroundColor DarkCyan
         try {
             winget install -e --id ajeetdsouza.zoxide
             Write-Host "zoxide installed successfully. Initializing..." -ForegroundColor Green
