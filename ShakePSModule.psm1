@@ -292,8 +292,7 @@ function psup {
         Write-Error "Failed to update PowerShell. Error: $_" -ForegroundColor DarkRed
     }
 }
-
-### Update Winget ###
+## Update Winget ##
 function winup {
     if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
         Write-Host "Winget is not installed. Installing Winget now..." -ForegroundColor Blue
@@ -310,26 +309,26 @@ function winup {
         return
     }
     Write-Host "Checking Winget for Updates..." -ForegroundColor Blue
+    $wingetUpgrade = winget upgrade winget
     $wingetVersion = winget --version
-    $wingetUpdateAvailable = winget upgrade --source winget --silent | 
-        Where-Object { $_ -match "winget" }
-    if ($wingetUpdateAvailable) {
-        Write-Host "Updating Winget..." -ForegroundColor Blue
-        try {
-            winget upgrade winget --silent
-            Write-Host "Winget updated successfully." -ForegroundColor Green
-        }
-        catch {
-            Write-Host "Failed to update Winget. Please update it manually." -ForegroundColor DarkRed
-        }
+    if ($wingetUpgrade -like "*No available upgrade found*") {
+        Write-Host "Winget is up to date." -ForegroundColor Green
+        Write-Host "Current Winget version: $wingetVersion" -ForegroundColor Yellow
+        return
     }
-    else {
-        Write-Host "Current Winget version: $wingetVersion" -ForegroundColor Yellow 
-        Write-Host "Winget is up to date." -ForegroundColor Green       
-    }  
+    try {
+        Write-Host "Updating Winget..." -ForegroundColor Yellow
+        winget upgrade winget --accept-package-agreements --accept-source-agreements --silent
+        Write-Host "Winget updated successfully." -ForegroundColor Green
+        Write-Host "Current Winget version: $wingetVersion" -ForegroundColor Yellow
+        return    
+    }
+    catch {
+        Write-Host "Failed to update Winget. Please update it manually." -ForegroundColor DarkRed   
+        return
+    }
 }
-
-    # Check all apps for upgrades
+## Check all apps for upgrades ##
 function winupall {
     Write-Host "Checking for app updates via Winget..." -ForegroundColor Blue
     $wingetUpdates = Get-WinGetPackage | Where-Object IsUpdateAvailable
@@ -352,7 +351,7 @@ function winupall {
         Write-Host "An error occurred while installing updates." -ForegroundColor DarkRed
     }
 }
-
+## Update Windows ##
 function windowup {
     if (-not (Get-Module -ListAvailable -Name PSWindowsUpdate)) {
         Write-Host "PSWindowsUpdate module not found. Installing..." -ForegroundColor Green
