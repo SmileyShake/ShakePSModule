@@ -466,6 +466,11 @@ function winpick {
         Write-Host "$Global:AppInfo" -ForegroundColor DarkGreen
         $Global:FullAppInfo
     }
+    Write-Host "Press Enter to continue or [y] to show more info about $Global:AppName." -ForegroundColor DarkCyan
+    $MoreInfo = Read-Host
+    if ($MoreInfo -match '^[Yy]$') {
+        winget show --id $Global:AppId
+    }
     return
 }
 
@@ -473,6 +478,7 @@ function winlist {
     Write-Host "These programs are isntalled.  Select a Package for More Info." -ForegroundColor DarkCyan
     $PackList = Get-WinGetPackage
     winpick $PackList
+    winget show --id $Global:AppId
     Clear-GlobalAppVariables
 }
 
@@ -495,7 +501,7 @@ function winin {
         Clear-GlobalAppVariables
         return
         }
-    Write-Host "Install [y] or [n]?" -ForegroundColor Magenta
+    Write-Host "Install $Global:AppName [y] or [n]?" -ForegroundColor Magenta
     $YorN = Read-Host
     if ($YorN -match '^[Nn]$') {
         Write-Host "$Global:AppInfo was not installed." -ForegroundColor Red
@@ -597,7 +603,7 @@ function winun {
         Clear-GlobalAppVariables
         return
     }
-    Write-Host "Uninstall [y] or [n]?" -ForegroundColor DarkRed
+    Write-Host "Uninstall  $Global:AppName [y] or [n]?" -ForegroundColor DarkRed
     $YorN = Read-Host
     if ($YorN -match '^[Yy]$') {
         $wingetUninstallArgs = @(
@@ -644,16 +650,17 @@ function Clear-GlobalAppVariables {
 # Set Oh-My-Posh Theme 
 function SetOmpTheme {
     param ()
-    [string]$OmpTheme
+    [string]$OmpTheme 
     $OmpThemeLocation = "$env:LOCALAPPDATA\Programs\oh-my-posh\themes"
     $OmpThemePath = Join-Path $OmpThemeLocation $OmpTheme
     $FZFThemePath = Test-Path $OmpThemePath
-    if (-not $FZFThemePath ) {
+    if ((-not $FZFThemePath) -or ($OmpTheme -eq "")) {
         Write-Host "$OmpTheme not found." -ForegroundColor Red
         Write-Host "Select another Oh-My-Posh Theme." -ForegroundColor DarkYellow
         ChangePoshTheme        
     }
     oh-my-posh init pwsh --config $OmpThemePath | Invoke-Expression
+    return
 }
 
 function ChangePoshTheme {
