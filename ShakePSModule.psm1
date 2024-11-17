@@ -466,11 +466,6 @@ function winpick {
         Write-Host "$Global:AppInfo" -ForegroundColor DarkGreen
         $Global:FullAppInfo
     }
-    Write-Host "Press Enter to continue or [y] to show more info about $Global:AppName." -ForegroundColor DarkCyan
-    $MoreInfo = Read-Host
-    if ($MoreInfo -match '^[Yy]$') {
-        winget show --id $Global:AppId
-    }
     return
 }
 
@@ -501,6 +496,11 @@ function winin {
         Clear-GlobalAppVariables
         return
         }
+    Write-Host "Enter [y] to show more info about $Global:AppName." -ForegroundColor DarkCyan
+    $MoreInfo = Read-Host
+    if ($MoreInfo -match '^[Yy]$') {
+        winget show --id $Global:AppId
+    }
     Write-Host "Install $Global:AppName [y] or [n]?" -ForegroundColor Magenta
     $YorN = Read-Host
     if ($YorN -match '^[Nn]$') {
