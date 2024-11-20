@@ -253,8 +253,8 @@ function junk {
 function cleanjunk {
     bb
     rammap
-    flushdns
     junk
+    flushdns
 }
 ## Starts HW Monitor and Cinebench ##
 function bench {
