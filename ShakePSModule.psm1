@@ -825,6 +825,7 @@ function pst { Get-Clipboard }
 ############### SETUP MODULES #################################
 ## Install Modules ##
 function ModInstall {
+    Update-Module -AcceptLicense -Force
     $modName = @(
         "PowerShellGet"
         "DnsClient"
