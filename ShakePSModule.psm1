@@ -339,20 +339,25 @@ function winupall {
         Write-Host "All packages are up to date." -ForegroundColor Green 
         return       
     }
-    Write-Host "Attempting to Update the following Packages via Winget:" -ForegroundColor Yellow
-    Write-Host $wingetUpdates 
-    $wingetUpdateIds = $wingetUpdates | Select-Object -ExpandProperty Id
-    $wingetUpdateArgs = @(
-        "--accept-package-agreements"
-        "--accept-source-agreements"
-        "--silent"
-        "--force" 
-        "--wait"
+    try {
+        Write-Host "Attempting to Update the following Packages via Winget:" -ForegroundColor Yellow
+        Write-Host $wingetUpdates 
+        $wingetUpdateIds = $wingetUpdates | Select-Object -ExpandProperty Id
+        $wingetUpdateArgs = @(
+            "--accept-package-agreements"
+            "--accept-source-agreements"
+            "--silent"
+            "--force" 
+            "--wait"
         )
-    foreach ($wingetUpdateId in $wingetUpdateIds) {
-        winget upgrade --id $wingetUpdateId @wingetUpdateArgs 
+        foreach ($wingetUpdateId in $wingetUpdateIds) {
+            winget upgrade --id $wingetUpdateId @wingetUpdateArgs 
+        }
+        Write-Host "All updates have been installed successfully." -ForegroundColor Green
     }
-    Write-Host "All updates have been installed successfully." -ForegroundColor Green
+    catch {
+        Write-Host "Failed to update some packages. Please update them manually." -ForegroundColor DarkRed
+    }
     return
 }
 ## Update Windows ##
@@ -499,7 +504,7 @@ function winin {
         Write-Host "No Package Selected." -ForegroundColor Red
         Clear-GlobalAppVariables
         return
-        }
+    }
     Write-Host "Enter [y] to show more info about $Global:AppName." -ForegroundColor DarkCyan
     $MoreInfo = Read-Host
     if ($MoreInfo -match '^[Yy]$') {
@@ -507,25 +512,15 @@ function winin {
     }
     Write-Host "Install $Global:AppName [y] or [n]?" -ForegroundColor Magenta
     $YorN = Read-Host
-    if ($YorN -match '^[Nn]$') {
+    if ( $YorN -NotMatch '^[Yy]$' ) {
         Write-Host "$Global:AppInfo was not installed." -ForegroundColor Red
         Clear-GlobalAppVariables
         return
     }
-    elseif  ( $YorN -match '^[Yy]$') { 
-        $UserName = whoami    
-        if ($UserName -eq "shake-mini\shake") {
-            InstallChoice 
-        }
-        else { 
-            StandardInstall 
-        }        
-    }
-    else {
-        Write-Host "$Global:AppInfo was not installed." -ForegroundColor Red
-        Clear-GlobalAppVariables
-        return
-    }
+    $UserName = whoami    
+    if ($UserName -ne "shake-mini\shake") { StandardInstall }
+    InstallChoice
+    return            
 }
 ## Standard Winget Installation ##
 function StandardInstall {
