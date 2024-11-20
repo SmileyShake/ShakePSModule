@@ -337,6 +337,8 @@ function winupall {
         return       
     }
     Write-Host "Attempting to Update the following Packages via Winget:" -ForegroundColor Yellow
+    $wingetUpdates 
+    $wingetUpdateIds = $wingetUpdates | Select-Object -ExpandProperty Id
     try {
         $wingetUpdateArgs = @(
             "--accept-package-agreements"
@@ -344,7 +346,9 @@ function winupall {
             "--silent"
             "--force"
         )
-        winget upgrade --all @wingetUpdateArgs
+        foreach ($packId in $wingetUpdateIds) {
+            winget upgrade --id $packId @wingetUpdateArgs
+        }
         Write-Host "All updates have been installed successfully." -ForegroundColor Green
     } 
     catch {
