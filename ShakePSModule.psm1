@@ -229,16 +229,19 @@ function junk {
     }
     try {
         Stop-Process -Name WinStore.App -ErrorAction SilentlyCont
-        $cachePath = "$env:LocalAppData\Packages\Microsoft.WindowsStore_8wekyb3d8bbwe\LocalCache"
-        Remove-Item -Path $cachePath\* -Recurse -Force        
+        $cachePath = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsStore_8wekyb3d8bbwe\LocalCache\*"
+        Get-ChildItem -Path $cachePath -Recurse -ErrorAction SilentlyContinue |
+            Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
     }
     catch {
         Write-Host "Could not Delete: $Path" -ForegroundColor Cyan
     }
     # Delete the contents of the SoftwareDistribution folder, suppress errors
     try {
+        $cachePath = "C:\Windows\Microsoft\Windows\SoftwareDistribution\Download\*"
         Stop-Service -Name wuauserv -ErrorAction SilentlyContinue 
-        Get-ChildItem -Path 'C:\Windows\SoftwareDistribution\Download\*' -Recurse -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+        Get-ChildItem -Path $cachePath -Recurse -ErrorAction SilentlyContinue | 
+            Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
         Start-Service -Name wuauserv -ErrorAction SilentlyContinue
     } 
     catch {
@@ -565,7 +568,6 @@ function InstallChoice {
             Write-Host "New folder created: $InstallPath" -ForegroundColor DarkCyan
             Write-Host "Opening $InstallPath check for successful operation." -ForegroundColor Yellow
             Start-Process explorer.exe -ArgumentList "$InstallPath"
-            Write-Host "$InstallPath will remain empty if winget could not set the Destination" -ForegroundColor Red
             Write-Host "Installing $Global:AppName..." -ForegroundColor Yellow
             $wingetChoiceArgs = @(
                 "--accept-package-agreements"
