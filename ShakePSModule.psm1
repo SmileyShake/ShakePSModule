@@ -340,23 +340,23 @@ function winupall {
         return       
     }
     Write-Host "Attempting to Update the following Packages via Winget:" -ForegroundColor Yellow
-    $wingetUpdates 
+    Write-Host " $wingetUpdates "
     $wingetUpdateIds = $wingetUpdates | Select-Object -ExpandProperty Id
     try {
         $wingetUpdateArgs = @(
             "--accept-package-agreements"
             "--accept-source-agreements"
             "--silent"
-            "--force"
         )
-        foreach ($packId in $wingetUpdateIds) {
-            winget upgrade --id $packId @wingetUpdateArgs
+        foreach ($wingetUpdateId in $wingetUpdateIds) {
+            winget upgrade --id $wingetUpdateId @wingetUpdateArgs
         }
         Write-Host "All updates have been installed successfully." -ForegroundColor Green
     } 
     catch {
         Write-Host "An error occurred while installing updates." -ForegroundColor DarkRed
     }
+    return
 }
 ## Update Windows ##
 function windowup {
@@ -825,7 +825,6 @@ function pst { Get-Clipboard }
 ############### SETUP MODULES #################################
 ## Install Modules ##
 function ModInstall {
-    Update-Module -AcceptLicense
     $modName = @(
         "PowerShellGet"
         "DnsClient"
@@ -838,6 +837,7 @@ function ModInstall {
     if (-not (Get-Module -ListAvailable -Name $mod)) {
         Install-Module -Name $mod -Scope CurrentUser -Force -SkipPublisherCheck
     }
+    Update-Module -Name $mod -AcceptLicense -WarningAction SilentlyContinue -Force -ErrorAction SilentlyContinue
     Import-Module -Name $mod
     }        
     Invoke-FuzzyFasd
