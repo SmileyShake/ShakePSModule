@@ -340,22 +340,19 @@ function winupall {
         return       
     }
     Write-Host "Attempting to Update the following Packages via Winget:" -ForegroundColor Yellow
-    Write-Host " $wingetUpdates "
+    Write-Host $wingetUpdates 
     $wingetUpdateIds = $wingetUpdates | Select-Object -ExpandProperty Id
-    try {
-        $wingetUpdateArgs = @(
-            "--accept-package-agreements"
-            "--accept-source-agreements"
-            "--silent"
+    $wingetUpdateArgs = @(
+        "--accept-package-agreements"
+        "--accept-source-agreements"
+        "--silent"
+        "--force" 
+        "--wait"
         )
-        foreach ($wingetUpdateId in $wingetUpdateIds) {
-            winget upgrade --id $wingetUpdateId @wingetUpdateArgs
-        }
-        Write-Host "All updates have been installed successfully." -ForegroundColor Green
-    } 
-    catch {
-        Write-Host "An error occurred while installing updates." -ForegroundColor DarkRed
+    foreach ($wingetUpdateId in $wingetUpdateIds) {
+        winget upgrade --id $wingetUpdateId @wingetUpdateArgs 
     }
+    Write-Host "All updates have been installed successfully." -ForegroundColor Green
     return
 }
 ## Update Windows ##
