@@ -369,23 +369,25 @@ function windowup {
     Write-Host "Checking for Windows Updates..." -ForegroundColor DarkCyan
     Import-Module PSWindowsUpdate
     $updates = Get-WindowsUpdate 
-    if ($updates) {
-        Write-Host "The following updates will be installed:" -ForegroundColor Yellow
-        $updates | Format-Table -Property Title, Size, KBArticleIDs
-        Write-Host "Installing Windows updates..." -ForegroundColor DarkCyan
-        Write-Host "The computer may restart automatically." -ForegroundColor DarkRed
-        Install-WindowsUpdate -AcceptAll -AutoReboot
-    }
-    else {
+    if (-not $updates) {
         Write-Host "Windows is up to date." -ForegroundColor Green
+        return
     }
+    Write-Host "The following updates will be installed:" -ForegroundColor Yellow
+    $updates | Format-Table -Property Title, Size, KBArticleIDs
+    Write-Host "Installing Windows updates..." -ForegroundColor DarkCyan
+    Write-Host "The computer may restart automatically." -ForegroundColor DarkYellow
+    Install-WindowsUpdate -AcceptAll -AutoReboot
+    Write-Host "Windows has been updated." -ForegroundColor Green
+    return    
 }
 ## Update PowerShell Modules ##
 function PSModuleUpdate {
-    Write-Host "Checking for PowerShell Module Updates..." -ForegroundColor DarkCyan
-    $moduleNames = Get-Module -All | Select-Object Name
-    ForEach ($moduleName in $moduleNames) {
-        Update-Module -Name $moduleName.Name -Force -ErrorAction SilentlyContinue -WarningAction SilentlyContinue
+    Write-Host "Checking for PowerShell Module Updates for:" -ForegroundColor DarkCyan
+    $Modules = Get-PSResource | Where-Object Name -NotLike "*Azure*" | Select-Object Name
+    foreach ($Module in $Modules) {
+        Write-Host "    $($Module.Name)" -ForegroundColor DarkCyan
+        Update-PSResource -Name $Module.Name -Force
     }
     Write-Host "PowerShell Modules have been updated." -ForegroundColor Green
 }
@@ -456,15 +458,12 @@ function winpick {
         }
         $app
     }
-
     # Prepare a fixed-width format for fzf
     $formattedAppList = $AppObject | ForEach-Object {
         '{0,-70} {1,-20} {2}' -f $_.Name, $_.Version, $_.Id
     }
-
     # Select an app via fzf
     $selectId = $formattedAppList | fzf --prompt=" Select a package: "
-
     if ($selectId) {
         # Parsing selection
         $selectId = $selectId -replace '┬«', '®' -replace 'ΓÇô', '-' -replace 'ΓÇª', ' '
@@ -563,7 +562,7 @@ function InstallChoice {
     if ($InstallOption -eq '1') {
         StandardInstall
     }
-    elseif ($InstallOption -eq '2') {            
+    if ($InstallOption -eq '2') {            
         try {
             $InstallPath = "D:\Program Files\$Global:AppName"
             New-Item -ItemType Directory -Path $InstallPath -Force | Out-Null
@@ -586,16 +585,13 @@ function InstallChoice {
         finally {
             Clear-GlobalAppVariables
         }
-        return  
-    }
-    elseif ($InstallOption -eq '3') {
-        Write-Host "$Global:AppInfo was not installed." -ForegroundColor Red
+        return
     }
     else {
         Write-Host "$Global:AppInfo was not installed." -ForegroundColor Red
+        Clear-GlobalAppVariables
+        return
     }
-    Clear-GlobalAppVariables
-    return
 }
 ## Winget Uninstall with FZF ##
 function winun {
