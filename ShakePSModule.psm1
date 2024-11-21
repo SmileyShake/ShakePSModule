@@ -381,12 +381,22 @@ function windowup {
         Write-Host "Windows is up to date." -ForegroundColor Green
     }
 }
+## Update PowerShell Modules ##
+function PSModuleUpdate {
+    Write-Host "Checking for PowerShell Module Updates..." -ForegroundColor DarkCyan
+    $moduleNames = Get-Module -All | Select-Object Name
+    ForEach ($moduleName in $moduleNames) {
+        Update-Module -Name $moduleName.Name -Force -ErrorAction SilentlyContinue -WarningAction SilentlyContinue
+    }
+    Write-Host "PowerShell Modules have been updated." -ForegroundColor Green
+}
 ## Update PowerShell, Winget, Programs and Windows ##
 function ud {
     psup
     winup
     winupall
     windowup
+    PSModuleUpdate
 }
 
 ##  Virus Scan  ##
@@ -830,7 +840,6 @@ function ModInstall {
     if (-not (Get-Module -ListAvailable -Name $mod)) {
         Install-Module -Name $mod -Scope CurrentUser -Force -SkipPublisherCheck
     }
-    Update-Module -Name $mod -AcceptLicense -WarningAction SilentlyContinue -Force -ErrorAction SilentlyContinue
     Import-Module -Name $mod
     }        
     Invoke-FuzzyFasd
