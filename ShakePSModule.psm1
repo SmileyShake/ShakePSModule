@@ -349,7 +349,6 @@ function winupall {
             "--accept-source-agreements"
             "--silent"
             "--force" 
-            "--wait"
         )
         foreach ($wingetUpdateId in $wingetUpdateIds) {
             winget upgrade --id $wingetUpdateId @wingetUpdateArgs 
