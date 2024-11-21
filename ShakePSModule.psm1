@@ -394,10 +394,10 @@ function ud {
     psup
     winup
     winupall
-    windowup
     PSModuleUpdate
+    windowup
 }
-
+###################
 ##  Virus Scan  ##
 function dvs {    
     Update-MpSignature -UpdateSource MicrosoftUpdateServer
@@ -716,7 +716,7 @@ function uptime {
             ForEach-Object { $_.ToString().Replace('Statistics since ', '') }
     }
 }
-
+###################################################
 ############# Network Utilities ###################
 ## Get IP Address ##
 function Get-PubIP { (Invoke-WebRequest http://ifconfig.me/ip).Content }
@@ -779,7 +779,7 @@ function rem {
         Write-Host "Could not connect to $CpuName." -ForegroundColor Red
     }
 }
- 
+################################################## 
 ############  Remove items from PowerShell History
 ## Remove Items from PSReadLine History 
 function Remove-PSReadlineHistory {
@@ -822,7 +822,7 @@ function rehis {
 function cpy { Set-Clipboard $args[0] }
 ## Paste ##
 function pst { Get-Clipboard }
-
+#######################################################################################
 ############### CALL PSInit in your Profile Script to start this section ##############
 ############### SETUP MODULES #################################
 ## Install Modules ##
@@ -928,7 +928,8 @@ function PSInit {
     ZoxSetUp
     AliasSetup
 }
-
+###############################################################################
+Write-Host "Use 'listcom' to show list of commands" -ForegroundColor DarkYellow
 function listcom { @"
 PowerShell Profile Help
 =======================
@@ -1081,7 +1082,7 @@ bench - Starts Cinbench and monitors.
 Use 'listcom' to display this help message.
 "@
 }
-Write-Host "Use 'listcom' to show list of commands" -ForegroundColor DarkYellow
+
 ##################################################################
 ##################################################################
 ##################################################################
