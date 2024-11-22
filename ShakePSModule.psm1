@@ -4,26 +4,25 @@
 
 ################### System Utilities #############################
 function Test-CommandExists {
-    param($command)
-    $exists = $null -ne (Get-Command $command -ErrorAction SilentlyContinue)
+    param ( $command )
+    $exists = $null -ne ( Get-Command $command -ErrorAction SilentlyContinue )
     return $exists
 }
 
-function touch($file) { "" | Out-File $file -Encoding ASCII }
+function touch ( $file ) { "" | Out-File $file -Encoding ASCII }
 
-function ff($name) {
-    Get-ChildItem -recurse -filter "*${name}*" -ErrorAction SilentlyContinue | ForEach-Object {
-        Write-Output "$($_.FullName)"
-    }
+function ff ( $name ) {
+    Get-ChildItem -recurse -filter "*${name}*" -ErrorAction SilentlyContinue | 
+        ForEach-Object { Write-Output "$($_. FullName)" }
 }
 
-function unzip ($file) {
-    Write-Output("Extracting", $file, "to", $pwd)
+function unzip ( $file ) {
+    Write-Output( "Extracting", $file, "to", $pwd )
     $fullFile = Get-ChildItem -Path $pwd -Filter $file | ForEach-Object { $_.FullName }
-    Expand-Archive -Path $fullFile -DestinationPath $pwd
+    Expand-Ar chive -Path $fullFile -DestinationPath $pwd
 }
 
-function grep($regex, $dir) {
+function grep ( $regex, $dir ) {
     if ( $dir ) {
         Get-ChildItem $dir | select-string $regex
         return
@@ -35,25 +34,25 @@ function df {
     get-volume
 }
 
-function far($file, $find, $replace) {
+function far ( $file, $find, $replace ) {
     (Get-Content $file).replace("$find", $replace) | Set-Content $file
 }
 
-function which($name) {
+function which ( $name ) {
     Get-Command $name | Select-Object -ExpandProperty Definition
 }
 
-function export($name, $value) {
+function export ( $name, $value ) {
     set-item -force -path "env:$name" -value $value;
 }
 
 function k9 { Stop-Process -Name $args[0] }
 
-function pkill($name) {
+function pkill ( $name ) {
     Get-Process $name -ErrorAction SilentlyContinue | Stop-Process
 }
 
-function pget($name) {
+function pget ( $name ) {
     Get-Process $name
 }
 
@@ -67,21 +66,21 @@ function tail {
   Get-Content $Path -Tail $n -Wait:$f
 }
 
-function nf { param($name) New-Item -ItemType "file" -Path . -Name $name }
+function nf { param ( $name ) New-Item -ItemType "file" -Path . -Name $name }
 
-function mkcd { param($dir) mkdir $dir -Force; Set-Location $dir }
+function mkcd { param ( $dir ) mkdir $dir -Force; Set-Location $dir }
 
 ## Signs PS Scipts locally ##
 function Set-Cert {
-   param(
-        [Parameter(Mandatory=$true)]
-        [string]$scriptPath
+   param (
+        [Parameter ( Mandatory=$true )]
+        [string] $scriptPath
     )     
     # Correct the certificate store path
     Set-Location -Path cert:\CurrentUser\My
     # Retrieve the certificate by its thumbprint
     $cert = Get-ChildItem | Where-Object { $_.Thumbprint -eq "75D9BC347BB03DD7DF87AF9B8607C7E3DFD7D591" }
-    if ($null -eq $cert) {
+    if ( $null -eq $cert ) {
         Write-Host "Error: Certificate with thumbprint 75D9BC347BB03DD7DF87AF9B8607C7E3DFD7D591 not found" -ForegroundColor Red
         home   
         return
@@ -101,7 +100,7 @@ function Set-Cert {
 function home { Set-Location -Path $HOME }
 function scripts {
     $UserName = whoami 
-    if ("$UserName" -eq "shake-mini\shake") {
+    if ( "$UserName" -eq "shake-mini\shake" ) {
         Set-Location -Path D:\Documents\PowerShell\Scripts
     }    
     else {    
@@ -112,7 +111,7 @@ function c { Set-Location -Path C:\ }
 function d { Set-Location -Path D:\ }
 function dl { 
     $UserName = whoami
-    if ("$UserName" -eq "shake-mini\shake") {
+    if ( "$UserName" -eq "shake-mini\shake" ) {
         Set-Location -Path D:\Downloads
     }
     else{
@@ -121,7 +120,7 @@ function dl {
 }
 function docs { 
     $UserName = whoami
-    if ("$UserName" -eq "shake-mini\shake") {
+    if ( "$UserName" -eq "shake-mini\shake" ) {
         Set-Location -Path D:\Documents
     }
     else {
@@ -178,17 +177,18 @@ function winutil {
 function bb { 
     $BleachbitPath = "$HOME\AppData\Local\BleachBit\bleachbit.exe"
     $UserName = whoami
-    if ($UserName -eq "shake-mini\shake"){
+    if ( $UserName -eq "shake-mini\shake" ) {
         $BleachbitPath = "D:\Program Files\BleachBit\bleachbit.exe"
         }
     Write-Host "Starting BleachBit..." -ForegroundColor Yellow
     Start-Process -FilePath $BleachbitPath -Verb RunAs
-    
+    return
 }
 ## Starts RAMMap ##
 function rammap { 
     Write-Host "Starting RAMMap..." -ForegroundColor Yellow        
     RAMMap64 
+    return
 }
 ## Delete Junk Files ##
 function junk {
@@ -222,8 +222,8 @@ function junk {
         "$env:APPDATA\Mozilla\Firefox\Profiles\*\security_state"    
     )   
     Write-Host "Deleting Junk Files from: " -ForegroundColor DarkCyan 
-    foreach ($Path in $Paths) {
-        Write-Host "    $Path " -ForegroundColor Cyan
+    Foreach ( $Path in $Paths ) {
+        Write-Ho st "    $Path " -ForegroundColor Cyan
         Get-ChildItem -Path $Path -Recurse -ErrorAction SilentlyContinue | 
             Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
     }
@@ -248,6 +248,7 @@ function junk {
         Write-Host "Could not Delete Software Distribution Download folder" -ForegroundColor Cyan
     }
     Write-Host "Junk Files Deleted." -ForegroundColor Green
+    return
 }
 ## Delete Junk Files, Open RamMap and BleachBit  ##
 function cleanjunk {
@@ -263,12 +264,13 @@ function bench {
     $HWMonPath = "C:\Program Files\CPUID\HWMonitor\HWMonitor.exe"
     $CineBenchPath = "$HOME\AppData\Local\Microsoft\WinGet\Packages\Maxon.CinebenchR23_Microsoft.Winget.Source_8wekyb3d8bbwe\Cinebench.exe"
     
-    if ($UserName -eq "shake-mini\shake") {
+    if ( $UserName -eq "shake-mini\shake" ) {
         $CineBenchPath = "D:\Program Files\CinebenchR23\Cinebench.exe"
         $HWMonPath = "D:\Program Files\hwmonitor\HWMonitor.exe"
     }
     Start-Process -FilePath $HWMonPath -Verb RunAs
     Start-Process -FilePath $CineBenchPath -Verb RunAs
+    return
 }
 ##########   UPDATES   ##########
 ### Update PowerShell ##
@@ -280,10 +282,10 @@ function psup {
         $gitHubApiUrl = "https://api.github.com/repos/PowerShell/PowerShell/releases/latest"
         $latestReleaseInfo = Invoke-RestMethod -Uri $gitHubApiUrl
         $latestVersion = $latestReleaseInfo.tag_name.Trim('v')
-        if ($currentVersion -lt $latestVersion) {
+        if ( $currentVersion -lt $latestVersion ) {
             $updateNeeded = $true
         }
-        if ($updateNeeded) {
+        if ( $updateNeeded ) {
             Write-Host "Updating PowerShell..." -ForegroundColor Yellow
             winget upgrade "Microsoft.PowerShell" --accept-source-agreements --accept-package-agreements
             Write-Host "PowerShell has been updated." -ForegroundColor Green
@@ -295,10 +297,11 @@ function psup {
     } catch {
         Write-Error "Failed to update PowerShell. Error: $_" -ForegroundColor DarkRed
     }
+    return
 }
 ## Update Winget ##
 function winup {
-    if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
+    if ( -not ( Get-Command winget -ErrorAction SilentlyContinue )) {
         Write-Host "Winget is not installed. Installing Winget now..." -ForegroundColor DarkCyan
         $installerUrl = "https://aka.ms/getwinget"
         $tempInstallerPath = "$env:TEMP\winget_installer.msixbundle"
@@ -315,7 +318,7 @@ function winup {
     Write-Host "Checking Winget for Updates..." -ForegroundColor DarkCyan
     $wingetUpgrade = winget upgrade winget
     $wingetVersion = winget --version
-    if ($wingetUpgrade -like "*No available upgrade found*") {
+    if ( $wingetUpgrade -like "*No available upgrade found*" ) {
         Write-Host "Winget is up to date." -ForegroundColor Green
         Write-Host "Current Winget version: $wingetVersion" -ForegroundColor Yellow
         return
@@ -336,7 +339,7 @@ function winup {
 function winupall {
     Write-Host "Checking for app updates via Winget..." -ForegroundColor DarkCyan
     $wingetUpdates = Get-WinGetPackage | Where-Object IsUpdateAvailable
-    if (-not $wingetUpdates) {
+    if ( -not $wingetUpdates ) {
         Write-Host "All packages are up to date." -ForegroundColor Green 
         return       
     }
@@ -350,7 +353,7 @@ function winupall {
             "--silent"
             "--force" 
         )
-        foreach ($wingetUpdateId in $wingetUpdateIds) {
+        Foreach ( $wingetUpdateId in $wingetUpdateIds ) {
             winget upgrade --id $wingetUpdateId @wingetUpdateArgs 
         }
         Write-Host "All updates have been installed successfully." -ForegroundColor Green
@@ -362,14 +365,14 @@ function winupall {
 }
 ## Update Windows ##
 function windowup {
-    if (-not (Get-Module -ListAvailable -Name PSWindowsUpdate)) {
+    if ( -not ( Get-Module -ListAvailable -Name PSWindowsUpdate )) {
         Write-Host "PSWindowsUpdate module not found. Installing..." -ForegroundColor Green
         Install-Module -Name PSWindowsUpdate -Force -Scope CurrentUser -AllowClobber
     }
     Write-Host "Checking for Windows Updates..." -ForegroundColor DarkCyan
     Import-Module PSWindowsUpdate
     $updates = Get-WindowsUpdate 
-    if (-not $updates) {
+    if ( -not $updates ) {
         Write-Host "Windows is up to date." -ForegroundColor Green
         return
     }
@@ -383,13 +386,14 @@ function windowup {
 }
 ## Update PowerShell Modules ##
 function PSModuleUpdate {
-    Write-Host "Checking for PowerShell Module Updates for:" -ForegroundColor DarkCyan
+    Write-Host "Attempting to update the following PowerShell Modules:" -ForegroundColor DarkCyan
     $Modules = Get-PSResource | Where-Object Name -NotLike "*Azure*" | Select-Object Name
-    foreach ($Module in $Modules) {
-        Write-Host "    $($Module.Name)" -ForegroundColor DarkCyan
+    Foreach ( $Module in $Modules) {
+        Writ e-Host "    $($Module.Name)" -ForegroundColor Cyan
         Update-PSResource -Name $Module.Name -Force
     }
     Write-Host "PowerShell Modules have been updated." -ForegroundColor Green
+    return
 }
 ## Update PowerShell, Winget, Programs and Windows ##
 function ud {
@@ -410,22 +414,24 @@ function dvs {
     # Get scan results
     $scanResults = Get-MpThreatDetection
     Write-Host "Scan Complete..." -ForegroundColor Green
-    if ($scanResults) {
+    if ( $scanResults ) {
         Write-Host "Threats Detected:" -ForegroundColor DarkRed
         Get-MPThreatDetection
+        return
     }  
-    else {
-        Write-Host "No threats detected by Windows Defender." -ForegroundColor Green
-    }               
+    Write-Host "No threats detected by Windows Defender." -ForegroundColor Green
+    return               
+}
+## Start Malwarebytes ##
+function mwb {
+    Write-Host "Starting Malwarebytes..." -ForegroundColor DarkCyan
+    Start-Process -FilePath "D:\Program Files\Malwarebytes\Malwarebytes.exe" -Verb RunAs
+    return
 }
 ## Virus Scan with Malwarebytes ##
 function vscan {
-    # Start Malwarebytes with elevated privileges
     $UserName = whoami
-    if ("$UserName" -eq "shake-mini\shake") {
-        Start-Process -FilePath "D:\Program Files\Malwarebytes\Malwarebytes.exe" -Verb RunAs
-        Write-Host "Starting MalwareBytes..." -ForegroundColor Yellow
-    }
+    if ( "$UserName" -eq "shake-mini\shake" ) { mwb } 
     dvs
 }
 ###############################################################################
@@ -433,15 +439,14 @@ function vscan {
 ###############################################################################
 ## WingetInstall with FZF ##
 function winpick {
-    param ($WingetCommand)
+    param ( $WingetCommand )
     Clear-GlobalAppVariables
     # Prompt for a package name if $WingetCommand is not provided
-    if (-not $WingetCommand) {
+    if ( -not $WingetCommand ) {
         Write-Host "Enter Package To Search For:" -ForegroundColor DarkCyan
         $PackName =  Read-Host
         $WingetCommand = Find-WingetPackage $PackName
     }
-
     # Create a custom object list using Add-Member
     $AppObject = $WingetCommand | ForEach-Object {
         $app = New-Object PSObject
@@ -460,21 +465,21 @@ function winpick {
     }
     # Prepare a fixed-width format for fzf
     $formattedAppList = $AppObject | ForEach-Object {
-        '{0,-70} {1,-20} {2}' -f $_.Name, $_.Version, $_.Id
+        '{0,-70} {1,-20} {2 }' -f $_.Name, $_.Version, $_.Id
     }
     # Select an app via fzf
     $selectId = $formattedAppList | fzf --prompt=" Select a package: "
-    if ($selectId) {
+    if ( $selectId ) {
         # Parsing selection
         $selectId = $selectId -replace '┬«', '®' -replace 'ΓÇô', '-' -replace 'ΓÇª', ' '
         $selectAppId = $selectId.Substring(90).Trim()
         # Filter selected AppObject
         $selectApp = $AppObject | Where-Object { 
-            ($_.Id -eq $selectAppId) 
+            ( $_.Id -eq $selectAppId ) 
         }
         # Set global variables with selected app information
         $selectApp | ForEach-Object {
-            $Global:AppName     = $_.Name 
+            $Global:AppName      = $_.Name 
             $Global:AppVersion  = $_.Version 
             $Global:AppId       = $_.Id
             $Global:AppInfo     = "$Global:AppName  (Id: $Global:AppId | Version: $Global:AppVersion)"
@@ -499,24 +504,24 @@ function winin {
     param (
         [string]$PackName
     )
-    if (-not $PackName) {
+    if ( -not $PackName ) {
     Write-Host "Enter Program to Install:" -ForegroundColor Cyan
     $PackName = Read-Host
     }
     $PackId = Find-WinGetPackage $PackName 
-    if (-not $PackId) {
+    if ( -not $PackId ) {
         Write-Host "No Packages found." -ForegroundColor Red
         return
     }
     winpick $PackId
-    if  (-not $Global:AppName) {
+    if  ( -not $Global:AppName ) {
         Write-Host "No Package Selected." -ForegroundColor Red
         Clear-GlobalAppVariables
         return
     }
     Write-Host "Enter [y] to show more info about $Global:AppName." -ForegroundColor DarkCyan
     $MoreInfo = Read-Host
-    if ($MoreInfo -match '^[Yy]$') {
+    if ( $MoreInfo -match '^[Yy]$' ) {
         winget show --id $Global:AppId
     }
     Write-Host "Install $Global:AppName [y] or [n]?" -ForegroundColor Magenta
@@ -527,7 +532,10 @@ function winin {
         return
     }
     $UserName = whoami    
-    if ($UserName -ne "shake-mini\shake") { StandardInstall }
+    if ( $UserName -ne "shake-mini\shake" ) { 
+        StandardInstall 
+        return
+    }
     InstallChoice
     return            
 }
@@ -559,10 +567,10 @@ function InstallChoice {
     Write-Host "  2. Create new folder "$Global:AppName" in 'D:\Program Files'" -ForegroundColor Cyan
     Write-Host "  3. Do Not Install $Global:AppName" -ForegroundColor Red
     $InstallOption = Read-Host 
-    if ($InstallOption -eq '1') {
+    if ( $InstallOption -eq '1' ) {
         StandardInstall
     }
-    if ($InstallOption -eq '2') {            
+    if ( $InstallOption -eq '2' ) {            
         try {
             $InstallPath = "D:\Program Files\$Global:AppName"
             New-Item -ItemType Directory -Path $InstallPath -Force | Out-Null
@@ -597,19 +605,19 @@ function InstallChoice {
 function winun {
     Write-Host "Select a Package to Uninstall:" -ForegroundColor Yellow
     $PackId = Get-WinGetPackage
-    if (-not $PackId) {
+    if ( -not $PackId ) {
         Write-Host "No valid package selected." -ForegroundColor DarkRed
         return
     }
     winpick $PackId
-    if  (-not $Global:AppName) {
+    if  ( -not $Global:AppName ) {
         Write-Host "No Package Selected." -ForegroundColor DarkRed
         Clear-GlobalAppVariables
         return
     }
     Write-Host "Uninstall  $Global:AppName [y] or [n]?" -ForegroundColor DarkRed
     $YorN = Read-Host
-    if ($YorN -match '^[Yy]$') {
+    if ( $YorN -match '^[Yy]$' ) {
         $wingetUninstallArgs = @(
             "--accept-source-agreements"
             "--disable-interactivity"                            
@@ -618,7 +626,7 @@ function winun {
             "--force"
         )
         try {
-            if ($Global:AppId -like 'ARP/*' -or  $Global:AppId -like 'MSIX/*') {
+            if ( $Global:AppId -like 'ARP/*' -or  $Global:AppId -like 'MSIX/*' ) {
                 winget uninstall --id $Global:AppID --all-versions $wingetUninstallArgs
                 Write-Host "$Global:AppInfo uninstalled successfully." -ForegroundColor Green
             }
@@ -654,11 +662,11 @@ function Clear-GlobalAppVariables {
 # Set Oh-My-Posh Theme 
 function SetOmpTheme {
     param ()
-    [string]$OmpTheme 
+    [string] $OmpTheme 
     $OmpThemeLocation = "$env:LOCALAPPDATA\Programs\oh-my-posh\themes"
     $OmpThemePath = Join-Path $OmpThemeLocation $OmpTheme
     $FZFThemePath = Test-Path $OmpThemePath
-    if ((-not $FZFThemePath) -or ($OmpTheme -eq "")) {
+    if (( -not $FZFThemePath ) -or ( $OmpTheme -eq "" )) {
         Write-Host "$OmpTheme not found." -ForegroundColor Red
         Write-Host "Select another Oh-My-Posh Theme." -ForegroundColor DarkYellow
         ChangePoshTheme        
@@ -670,7 +678,7 @@ function SetOmpTheme {
 function ChangePoshTheme {
     $ThemePath = "$env:LOCALAPPDATA\Programs\oh-my-posh\themes"
     $NewTheme = Get-ChildItem "$ThemePath" | Select-Object Name | fzf
-    if (-not $NewTheme) {
+    if ( -not $NewTheme ) {
         Write-Host "No theme selected." -ForegroundColor DarkRed
         return
     }
@@ -684,11 +692,11 @@ function ChangePoshTheme {
 
 function ChangeOmpThemeInProfile {
     param ()
-    [string]$NewTheme    
+    [string] $NewTheme    
     $ProfilePath = $PROFILE
     $OmpThemeInProfile = '(?<=\$OmpTheme\s=\s")[^"]+'
     $profileContents = Get-Content -Path $ProfilePath -Raw
-    if ($profileContents -notmatch $OmpThemeInProfile) {
+    if ( $profileContents -notmatch $OmpThemeInProfile ) {
         Write-Host "Could not find OmpTheme variable in the profile." -ForegroundColor Red
         return
     }
@@ -701,7 +709,7 @@ function ChangeOmpThemeInProfile {
 function sysinfo { Get-ComputerInfo }
 
 function uptime {
-    if ($PSVersionTable.PSVersion.Major -eq 5) {
+    if ( $PSVersionTable.PSVersion.Major -eq 5 ) {
         Get-WmiObject win32_operatingsystem | 
             Select-Object @{Name='LastBootUpTime';
             Expression={$_.ConverttoDateTime($_.lastbootuptime)}} | 
@@ -709,7 +717,7 @@ function uptime {
     } else {
         net statistics workstation | 
             Select-String "since" | 
-            ForEach-Object { $_.ToString().Replace('Statistics since ', '') }
+            ForEach-Object { $_.ToString().Replace('Stat istics since ', '') }
     }
 }
 ###################################################
@@ -741,7 +749,7 @@ function ReNet {
     netsh winsock reset    
     # Prompt the user to restart
     $restart = Read-Host "TCP/IP stack has been reset. Do you want to restart now? (Y/N)"
-    if ($restart -eq 'Y' -or $restart -eq 'y') {
+    if ( $restart -match '^[Yy]$' ) {
         Restart-Computer
     } 
     else {
@@ -750,10 +758,10 @@ function ReNet {
 }
 ## Establish preconfigured WinRM Session  ##
 function rem {
-    param (
-        [string]$CpuName
+    param ( 
+        [string] $CpuName 
     )
-    if (-not $CpuName){
+    if ( -not $CpuName ){
         Write-Host "Enter ComputerName:" -ForegroundColor DarkCyan
         $CpuName = Read-Host
     }
@@ -780,8 +788,8 @@ function rem {
 ## Remove Items from PSReadLine History 
 function Remove-PSReadlineHistory {
     param (
-        [Parameter(Mandatory = $true)]
-        [string]$Pattern
+        [Parameter ( Mandatory = $true )]
+        [string] $Pattern
     )
 
     $historyPath = (Get-PSReadLineOption).HistorySavePath
@@ -801,7 +809,7 @@ function Remove-PSHistory {
     $historyLines = Get-History
     $matchingLines = $historyLines | Where-Object { $_.CommandLine -match $Pattern }
     $matchingLines | ForEach-Object { Clear-History -Id $_.Id }
-    Write-Host "Removed $($matchingLines.Count) line(s) from PowerShell history."
+     Write-Host "Removed $($matchingLines.Count) line(s) from PowerShell history."
 }
 ## Removes Items from PSHistory and PSReadlineHistory simultaneosly ##
 function rehis {
@@ -831,8 +839,8 @@ function ModInstall {
         "PSFzf"
         "Microsoft.Winget.Client"
     )
-    foreach ($mod in $modName) {
-    if (-not (Get-Module -ListAvailable -Name $mod)) {
+    Foreach ( $mod in $modName) {
+    if ( -not ( Get-Module -ListAvailable -Name $mod )) {
         Install-Module -Name $mod -Scope CurrentUser -Force -SkipPublisherCheck
     }
     Import-Module -Name $mod
@@ -843,7 +851,7 @@ function ModInstall {
     Invoke-FzfTabCompletion
 
     $ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
-    if (Test-Path($ChocolateyProfile)) {
+    if ( Test-Path ( $ChocolateyProfile )) {
         Import-Module "$ChocolateyProfile"
     }
 }
@@ -863,13 +871,13 @@ function PSRLsetup {
         Error = 'Red'    
         Selection = 'White'
     }
-    if ($PSVersionTable.PSVersion.Major -eq 7 ) {
+    if ( $PSVersionTable.PSVersion.Major -eq 7 ) {
         Set-PSReadLineOption -Colors @{
             ListPrediction = 'DarkGreen'
             Selection = "$($PSStyle.Background.Blue)$($PSStyle.Foreground.White)"
             InlinePrediction = $PSStyle.Foreground.BrightYellow + $PSStyle.Background.BrightBlack
         }
-        if (-not (Get-Module -ListAvailable -Name CompletionPredictor)) {
+        if ( -not ( Get-Module -ListAvailable -Name CompletionPredictor )) {
             Install-Module -Name CompletionPredictor -Scope CurrentUser -Force -SkipPublisherCheck
         }
         Set-PSReadLineOption -PredictionSource HistoryAndPlugin
@@ -884,14 +892,14 @@ function PSRLsetup {
     Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' -PSReadlineChordReverseHistory 'Ctrl+r'
     #####
     Register-ArgumentCompleter -Native -CommandName '*' -ScriptBlock {
-        param($commandName, $wordToComplete, $cursorPosition)
+        param ( $commandName, $wordToComplete, $cursorPosition )
         Invoke-CompletionPredictor -WordToComplete $wordToComplete -CursorPosition $cursorPosition
     }
 }
 ## Setup Zoxide ##
 function ZoxSetUp {
-    if (Get-Command zoxide -ErrorAction SilentlyContinue) {
-        Invoke-Expression (& { (zoxide init powershell | Out-String) }) 
+    if ( Get-Command zoxide -ErrorAction SilentlyContinue ) {
+        Invoke-Expression (& { ( zoxide init powershell | Out-String ) }) 
     } 
     else {
         Write-Host "zoxide command not found. Attempting to install via winget..." -ForegroundColor DarkCyan
