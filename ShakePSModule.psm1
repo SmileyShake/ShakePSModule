@@ -180,13 +180,13 @@ function bb {
     if ( $UserName -eq "shake-mini\shake" ) {
         $BleachbitPath = "D:\Program Files\BleachBit\bleachbit.exe"
         }
-    Write-Host "Starting BleachBit..." -ForegroundColor Yellow
+    Write-Host "Starting BleachBit..." -ForegroundColor DarkCyan
     Start-Process -FilePath $BleachbitPath -Verb RunAs
     return
 }
 ## Starts RAMMap ##
 function rammap { 
-    Write-Host "Starting RAMMap..." -ForegroundColor Yellow        
+    Write-Host "Starting RAMMap..." -ForegroundColor DarkCyan
     RAMMap64 
     return
 }
