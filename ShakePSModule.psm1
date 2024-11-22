@@ -232,6 +232,7 @@ function junk {
         $cachePath = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsStore_8wekyb3d8bbwe\LocalCache\*"
         Get-ChildItem -Path $cachePath -Recurse -ErrorAction SilentlyContinue |
             Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+        Start-Process -Name WinStore.App 
     }
     catch {
         Write-Host "Could not Delete: $Path" -ForegroundColor Cyan
