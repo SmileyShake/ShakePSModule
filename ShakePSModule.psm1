@@ -389,7 +389,7 @@ function PSModuleUpdate {
     Write-Host "Attempting to update the following PowerShell Modules:" -ForegroundColor DarkCyan
     $Modules = Get-PSResource | Where-Object Name -NotLike "*Azure*" | Select-Object Name
     Foreach ( $Module in $Modules) {
-        Writ e-Host "    $($Module.Name)" -ForegroundColor Cyan
+        Write-Host "    $($Module.Name)" -ForegroundColor Cyan
         Update-PSResource -Name $Module.Name -Force
     }
     Write-Host "PowerShell Modules have been updated." -ForegroundColor Green
