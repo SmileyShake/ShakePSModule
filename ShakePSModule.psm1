@@ -497,7 +497,7 @@ function winlist {
     Write-Host "These programs are isntalled.  Select a Package for More Info." -ForegroundColor DarkCyan
     $PackList = Get-WinGetPackage
     winpick $PackList
-    winget show --id $Global:AppId
+    winget show --Name $Global:AppName --Version $Global:AppVersion --accept-source-agreements
     Clear-GlobalAppVariables
 }
 
@@ -523,7 +523,7 @@ function winin {
     Write-Host "Enter [y] to show more info about $Global:AppName." -ForegroundColor DarkCyan
     $MoreInfo = Read-Host
     if ( $MoreInfo -match '^[Yy]$' ) {
-        winget show --id $Global:AppId
+        winget show --Name $Global:AppName --Version $Global:AppVersion --accept-source-agreements
     }
     Write-Host "Install $Global:AppName [y] or [n]?" -ForegroundColor Magenta
     $YorN = Read-Host
