@@ -320,8 +320,8 @@ function winup {
     $wingetUpgrade = winget upgrade winget
     $wingetVersion = winget --version
     if ( $wingetUpgrade -like "*No available upgrade found*" ) {
-        Write-Host "Winget is up to date." -ForegroundColor Green
         Write-Host "Current Winget version: $wingetVersion" -ForegroundColor Yellow
+        Write-Host "Winget is up to date." -ForegroundColor Green
         return
     }
     try {
@@ -346,8 +346,9 @@ function winupall {
     }
     try {
         Write-Host "Attempting to Update the following Packages via Winget:" -ForegroundColor Yellow
-        Write-Host $wingetUpdates 
+        $wingetUpdateNames = $wingetUpdates | Select-Object Name, Version, Id
         $wingetUpdateIds = $wingetUpdates | Select-Object -ExpandProperty Id
+        Write-Host $wingetUpdateNames
         $wingetUpdateArgs = @(
             "--accept-package-agreements"
             "--accept-source-agreements"
