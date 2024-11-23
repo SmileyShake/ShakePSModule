@@ -345,9 +345,9 @@ function winupall {
         return       
     }
     try {
-        Write-Host "Attempting to Update the following Packages via Winget:" -ForegroundColor Yellow
-        $wingetUpdateNames = $wingetUpdates | Select-Object Name, Version, Id
+        $wingetUpdateNames = $wingetUpdates | Select-Object Name, Id | Format-Table -AutoSize
         $wingetUpdateIds = $wingetUpdates | Select-Object -ExpandProperty Id
+        Write-Host "Attempting to Update the following Packages via Winget:" -ForegroundColor Yellow
         Write-Host $wingetUpdateNames
         $wingetUpdateArgs = @(
             "--accept-package-agreements"
