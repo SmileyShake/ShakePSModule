@@ -339,13 +339,13 @@ function winup {
 ## Check all apps for upgrades ##
 function winupall {
     Write-Host "Checking for app updates via Winget..." -ForegroundColor DarkCyan
-    $wingetUpdates = Get-WinGetPackage | Where-Object IsUpdateAvailable
+    $wingetUpdates = Get-WinGetPackage | Where-Object IsUpdateAvailable | Select-Object Name, Id
     if ( -not $wingetUpdates ) {
         Write-Host "All packages are up to date." -ForegroundColor Green 
         return       
     }
     try {
-        $wingetUpdateNames = $wingetUpdates | Select-Object Name 
+        $wingetUpdateNames = $wingetUpdates | Select-Object $wingetUpdates.Name 
         $wingetUpdateIds = $wingetUpdates | Select-Object -ExpandProperty Id
         Write-Host "Attempting to Update the following Packages via Winget:" -ForegroundColor Yellow
         Write-Host "    $wingetUpdateNames " -ForegroundColor Cyan
