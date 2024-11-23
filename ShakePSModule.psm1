@@ -345,7 +345,7 @@ function winupall {
         return       
     }
     try {
-        $wingetUpdateNames = $wingetUpdates | Select-Object Name, Id | Format-Table -AutoSize
+        $wingetUpdateNames = $wingetUpdates | Select-Object -ExpandProperty Name
         $wingetUpdateIds = $wingetUpdates | Select-Object -ExpandProperty Id
         Write-Host "Attempting to Update the following Packages via Winget:" -ForegroundColor Yellow
         Write-Host $wingetUpdateNames
