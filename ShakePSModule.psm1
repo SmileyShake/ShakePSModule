@@ -345,10 +345,10 @@ function winupall {
         return       
     }
     try {
-        $wingetUpdateNames = $wingetUpdates | Select-Object $wingetUpdates.Name 
+        $wingetUpdateNames = $wingetUpdates | Select-Object -ExpandProperty Name
         $wingetUpdateIds = $wingetUpdates | Select-Object -ExpandProperty Id
         Write-Host "Attempting to Update the following Packages via Winget:" -ForegroundColor Yellow
-        Write-Host "    $wingetUpdateNames " -ForegroundColor Cyan
+        Write-Output $wingetUpdateNames 
         $wingetUpdateArgs = @(
             "--accept-package-agreements"
             "--accept-source-agreements"
