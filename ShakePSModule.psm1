@@ -494,6 +494,9 @@ function winpick {
     return
 }
 function winshow {
+    if ( -not $Global:AppName ) {
+        winpick
+    }
     $wingetAppInfo = winget show --Id $Global:AppId --accept-source-agreements
     if ( $wingetAppInfo -Like '*No package found matching input criteria.*') {
         $wingetAppInfo = winget show --Name $Global:AppName --Version $Global:AppVersion --accept-source-agreements
