@@ -498,7 +498,7 @@ function winlist {
     Write-Host "These programs are isntalled.  Select a Package for More Info." -ForegroundColor DarkCyan
     $PackList = Get-WinGetPackage
     winpick $PackList
-    winget show --Name $Global:AppName --Version $Global:AppVersion --accept-source-agreements
+    winget show --Name $Global:AppName --Id $Global:AppId --Version $Global:AppVersion --accept-source-agreements
     Clear-GlobalAppVariables
 }
 
