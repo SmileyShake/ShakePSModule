@@ -493,15 +493,20 @@ function winpick {
     }
     return
 }
+function winshow {
+    $wingetAppInfo = winget show --Id $Global:AppId --accept-source-agreements
+    if ( $wingetAppInfo -Like '*No package found matching input criteria.*') {
+        $wingetAppInfo = winget show --Name $Global:AppName --Version $Global:AppVersion --accept-source-agreements
+    }
+    Write-Output $wingetAppInfo
+    return
+}
 
 function winlist {
     Write-Host "These programs are isntalled.  Select a Package for More Info." -ForegroundColor DarkCyan
     $PackList = Get-WinGetPackage
     winpick $PackList
-    $wingetAppInfo = winget show --Id $Global:AppId --accept-source-agreements
-    if ( $wingetAppInfo -Like '*No package found matching input criteria.*') {
-        $wingetAppInfo = winget show --Name $Global:AppName --Version $Global:AppVersion --accept-source-agreements
-    Write-Output $wingetAppInfo
+    winshow
     Clear-GlobalAppVariables
 }
 
@@ -527,7 +532,7 @@ function winin {
     Write-Host "Enter [y] to show more info about $Global:AppName." -ForegroundColor DarkCyan
     $MoreInfo = Read-Host
     if ( $MoreInfo -match '^[Yy]$' ) {
-        winget show --Name $Global:AppName --Version $Global:AppVersion --accept-source-agreements
+        winshow
     }
     Write-Host "Install $Global:AppName [y] or [n]?" -ForegroundColor Magenta
     $YorN = Read-Host
