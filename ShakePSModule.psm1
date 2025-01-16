@@ -218,8 +218,7 @@ function junk {
         "$env:APPDATA\Mozilla\Firefox\Profiles\*\formhistory.sqlite"
         "$env:APPDATA\Mozilla\Firefox\Crash Reports\*"
         "$env:LOCALAPPDATA\Mozilla\Firefox\Crash Reports\pending\*"
-        "$env:APPDATA\Mozilla\Firefox\Profiles\*\content-prefs.sqlite"
-        "$env:APPDATA\Mozilla\Firefox\Profiles\*\security_state"    
+        "$env:APPDATA\Mozilla\Firefox\Profiles\*\content-prefs.sqlite"    
     )   
     Write-Host "Deleting Junk Files from: " -ForegroundColor DarkCyan 
     Foreach ( $Path in $Paths ) {
