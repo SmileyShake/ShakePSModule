@@ -1,0 +1,139 @@
+{
+  "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+  "version": 2,
+  "console_title_template": "{{ .Folder }}",
+  "blocks": [
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "segments": [
+        {
+          "type": "text",
+          "style": "plain",
+          "template": "\u250c",
+          "foreground": "#00ffff"
+        },
+        {
+          "type": "session",
+          "style": "diamond",
+          "trailing_diamond": "\ue0bc",
+          "leading_diamond": "\ue0b6",
+          "template": "\uf1d0  {{ .HostName }} \ue683 {{ .UserName }} ",
+          "foreground": "#00ffff",
+          "background": "#3b3b3b"
+        },
+        {
+          "type": "sysinfo",
+          "style": "diamond",
+          "trailing_diamond": "\ue0bc",
+          "template": " \ue266 {{ round .PhysicalPercentUsed .Precision }}% ",
+          "properties": {
+            "precision": 0
+          },
+          "foreground":"#00bbff",
+          "background": "#00274d"
+        },
+        {
+          "type": "executiontime",
+          "style": "diamond",
+          "trailing_diamond": "\ue0bc",
+          "properties": {
+            "style": "round",
+            "threshold": 0
+          },
+          "template": " 󱦟 {{ .FormattedMs }} ",
+          "foreground":"#00bbff",
+          "background": "#3b3b3b"
+        },
+        {
+          "type": "time",
+          "style": "diamond",        
+          "trailing_diamond": "\ue0bc",
+          "template": " \uf017 {{ .CurrentDate | date .Format }}",
+          "properties": {
+            "time_format": "3:04 PM"
+          },        
+          "foreground":"#00bbff",
+          "background": "#00274d"
+        }
+      ]
+    },
+    { 
+      "type": "prompt",
+      "alignment": "left",
+      "newline": true,
+      "segments": [
+        {
+          "type": "text",
+          "style": "plain",
+          "template": "\u2502 ",
+          "foreground": "#00ffff"
+        },
+        {
+          "type": "path",
+          "style": "powerline",
+          "powerline_symbol": "\ue0bc",
+          "leading_powerline_symbol": "\ue0b6",
+          "template": "\u2e0e  \uf07b {{ .Path }} ",
+          "properties": {
+            "style": "full"
+          },
+          "foreground":"#00bbff",
+          "background": "#00274d"
+        },
+        {
+          "type": "git",
+          "style": "powerline",
+          "powerline_symbol": "\ue0bc",
+          "background_templates": [
+            "{{ if or (.Working.Changed) (.Staging.Changed) }}#ffa300{{ end }}",
+            "{{ if and (gt .Ahead 0) (gt .Behind 0) }}#00b55b{{ end }}",
+            "{{ if gt .Ahead 0 }}#00ffff{{ end }}",
+            "{{ if gt .Behind 0 }}#ff7799{{ end }}"
+          ],
+          "template": " \ue65c {{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }} \uf044 {{ .Working.String }}{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Staging.Changed }} \uf046 {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0 }} \ueb4b {{ .StashCount }}{{ end }} ",
+          "properties": {
+            "fetch_stash_count": true,
+            "fetch_status": true,
+            "fetch_upstream_icon": true
+          },
+          "foreground":"#00bbff",
+          "background": "#3b3b3b"
+        },
+        {
+          "type": "status",
+          "style": "diamond",
+          "background_templates": [
+            "{{ if gt .Code 0 }}#3b3b3b{{ end }}"
+          ],
+          "trailing_diamond": "\ue0bc",
+          "template": "  ",
+          "properties": {
+            "always_enabled": true
+          },
+          "foreground":"#00bbff",
+          "background": "#00274d"
+        }             
+      ]
+    },
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "newline": true,
+      "segments": [
+        {
+          "type": "text",
+          "style": "plain",
+          "template": "\u2514\u2500\u25b7 ",
+          "foreground": "#00ffff"
+        },
+        {
+          "type": "root",
+          "style": "plain",
+          "template": "\uf0e7 ",
+          "foreground": "#00ffff"
+        }
+      ]
+    }
+  ]
+}
