@@ -673,7 +673,7 @@ function Clear-GlobalAppVariables {
 function SetOmpTheme {
     param ()
     [string] $OmpTheme 
-    $OmpThemeLocation = "C:\Program Files (x86)\oh-my-posh\themes"
+    $OmpThemeLocation = $env:POSH_THEMES_PATH
     $OmpThemePath = Join-Path $OmpThemeLocation $OmpTheme
     $FZFThemePath = Test-Path $OmpThemePath
     if (( -not $FZFThemePath ) -or ( $OmpTheme -eq "" )) {
