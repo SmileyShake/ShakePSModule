@@ -686,7 +686,7 @@ function SetOmpTheme {
 }
 
 function ChangePoshTheme {
-    $ThemePath = "C:\Program Files (x86)\oh-my-posh\themes"
+    $ThemePath = $env:POSH_THEMES_PATH
     $NewTheme = Get-ChildItem "$ThemePath" | Select-Object Name | fzf
     if ( -not $NewTheme ) {
         Write-Host "No theme selected." -ForegroundColor DarkRed
