@@ -173,17 +173,17 @@ function winutil {
 }
 
 ########## Junk Files and Ram Clean Up ############
-## Starts BleachBit ##
-function bb { 
-    $BleachbitPath = "$HOME\AppData\Local\BleachBit\bleachbit.exe"
-    $UserName = whoami
-    if ( $UserName -eq "shake-mini\shake" ) {
-        $BleachbitPath = "D:\Program Files\BleachBit\bleachbit.exe"
-        }
-    Write-Host "Starting BleachBit..." -ForegroundColor DarkCyan
-    Start-Process -FilePath $BleachbitPath -Verb RunAs
-    return
-}
+#bb Starts BleachBit ##
+#bb function bb { 
+#bb    $BleachbitPath = "$HOME\AppData\Local\BleachBit\bleachbit.exe"
+#bb    $UserName = whoami
+#bb    if ( $UserName -eq "shake-mini\shake" ) {
+#bb        $BleachbitPath = "D:\Program Files\BleachBit\bleachbit.exe"
+#bb        }
+#bb    Write-Host "Starting BleachBit..." -ForegroundColor DarkCyan
+#bb    Start-Process -FilePath $BleachbitPath -Verb RunAs
+#bb    return
+#bb }
 ## Starts RAMMap ##
 function rammap { 
     Write-Host "Starting RAMMap..." -ForegroundColor DarkCyan
@@ -250,7 +250,7 @@ function junk {
 }
 ## Delete Junk Files, Open RamMap and BleachBit  ##
 function cleanjunk {
-    bb
+#bb bb
     rammap
     junk
     flushdns
