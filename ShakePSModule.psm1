@@ -857,7 +857,6 @@ function ModInstall {
     Import-Module -Name $mod
     }        
     Invoke-FuzzyFasd
-    Invoke-FuzzyZLocation
     Set-LocationFuzzyEverything
     Invoke-FzfTabCompletion
 
