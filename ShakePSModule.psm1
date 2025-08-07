@@ -847,6 +847,7 @@ function ModInstall {
         "Terminal-Icons"
         "PSReadLine"
         "PSFzf"
+        "ZLocation"
         "Microsoft.Winget.Client"
     )
     Foreach ( $mod in $modName) {
